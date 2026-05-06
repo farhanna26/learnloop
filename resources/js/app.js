@@ -1,4 +1,4 @@
-// import './bootstrap';
+//import './bootstrap';
 
 /**
  * Echo exposes an expressive API for subscribing to channels and listening
@@ -7,11 +7,4 @@
  */
 
 import './echo';
-
-// Nangkep sinyal dari Reverb
-window.Echo.channel('chat-channel')
-    .listen('.message.sent', (e) => {
-        console.log('🔥 BOOM! Pesan masuk Han:', e);
-        alert('Ada pesan baru masuk ke LearnLoop!');
-    });
 
