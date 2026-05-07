@@ -3,34 +3,53 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Message;
 use App\Events\MessageSent;
+use App\Models\Message; 
+use Illuminate\Support\Facades\Auth; 
 
 class ChatController extends Controller
 {
-    // Fungsi 1: Buat nampilin halaman web dan narik riwayat chat lama
     public function index()
     {
-        // Ambil 50 pesan terakhir dari database
-        $messages = Message::latest()->take(50)->get()->reverse()->values();
-        
-        // Nanti kita arahin ke file view 'chat.blade.php'
-        return view('chat', compact('messages')); 
+        // Narik semua pesan sekalian sama data user-nya (Eager Loading)
+        $messages = Message::with('user')->get(); 
+
+        // Nampilin ke piring chat.blade.php
+        return view('chat', compact('messages'));
     }
 
-    // Fungsi 2: Buat nerima ketikan pesan baru dari user
+    // 2. Fungsi buat ngirim pesan
     public function store(Request $request)
-    {
-        // 1. Simpan pesan ke database
-        $message = Message::create([
-            'username' => $request->username,
-            'text' => $request->text
+{
+    // 1. Validasi
+    $request->validate([
+        'message' => 'required|string' 
+    ]);
+
+    // 2. Proteksi kalau belum login (biar gak error null pointer)
+    if (!auth()->check()) {
+        return response()->json(['error' => 'Woi, login dulu!'], 401);
+    }
+
+    $user = auth()->user();
+
+    try {
+        // 3. Simpan ke database
+        // Pastiin di tabel messages lu emang ada kolom 'user_id' dan 'message'
+        $chat = Message::create([
+            'username' => $user->name,
+            'text' => $request->message,
         ]);
 
-        // 2. Tembak sinyal ke Reverb! (Kayak yang lu lakuin di Tinker tadi)
-        broadcast(new MessageSent("{$message->username} bilang: {$message->text}"));
+        // 4. Kirim sinyal (Urutannya: Nama, baru Pesan)
+        broadcast(new MessageSent($user->name, $request->message));
 
-        // 3. Kasih balasan ke browser kalau sukses
-        return response()->json(['status' => 'Pesan terkirim!']);
+        return response()->json(['status' => 'success']);
+        
+    } catch (\Exception $e) {
+        // Kalau error 500 muncul lagi, cek tab 'Response' di browser. 
+        // Lu bakal liat alasan sebenernya kenapa dia meledak.
+        return response()->json(['error' => $e->getMessage()], 500);
     }
+}
 }
