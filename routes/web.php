@@ -4,14 +4,31 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\AuthController;
 
-// SEBELUMNYA: return view('chat'); -> SALAH karena gak bawa data
-// SEKARANG: Panggil Controller biar dia yang ambilin data chat dari database
-Route::get('/', [ChatController::class, 'index']);
+// --- ZONA SATPAM (Wajib Login) ---
+// Pakai middleware 'auth' buat ngecek sesi login
+Route::middleware('auth')->group(function () {
+    // 1. Rute Beranda (Feed Utama)
+    Route::get('/beranda', function() {
+        return view('beranda'); // Nanti Nabila bikin piring beranda.blade.php
+    })->name('beranda');
 
-Route::get('/chat', [ChatController::class, 'index']);
-Route::post('/chat/send', [ChatController::class, 'store']);
+    // 2. Rute Chat (Nanti diakses lewat tombol di sidebar)
+    Route::get('/chat', [ChatController::class, 'index']);
+    Route::post('/chat/send', [ChatController::class, 'store']);
 
-// Rute buat Satpam (Auth)
-Route::post('/register', [AuthController::class, 'register']);
+    // 3. Rute Profil Diri Sendiri (Pojok Kiri Atas)
+    // Nanti narik data dari PortfolioController
+});
+
+// --- ZONA BEBAS ---
+
+// 1. Ini rute buat NAMPILIN halaman form loginnya. 
+// TANDA ->name('login') INI YANG PALING PENTING BIAR SATPAMNYA GAK BINGUNG!
+Route::get('/login', function () {
+    return view('auth.login'); // Sesuaikan sama file blade bikinan kawan lu
+})->name('login');
+
+// 2. Rute POST yang lu bikin tadi tetep dibiarin aja di bawahnya
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout']);
+Route::post('/register', [AuthController::class, 'register']);
+// ... (dan lain-lain)

@@ -4,11 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+// Tambahin ini biar relasinya nggak bingung nyari alamat
+use App\Models\User; 
 
 class Message extends Model
 {
     use HasFactory;
 
-    // Tambahin baris ini:
-    protected $guarded = [];
+    // 1. Kolom yang boleh diisi
+    // PASTIKAN di phpMyAdmin/Migration lu nama kolomnya emang 'message', bukan 'text'!
+    protected $fillable = ['username', 'text'];
+
+    // 2. Relasi ke User
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'username');
+    }
 }

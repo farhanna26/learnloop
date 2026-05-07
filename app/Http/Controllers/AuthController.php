@@ -35,4 +35,37 @@ class AuthController extends Controller
 
         return response()->json(['status' => 'success', 'message' => 'Akun berhasil dibuat sebagai ' . $request->role . '!']);
     }
+
+    // INI FUNGSI YANG DICARIIN SAMA LARAVEL TADI!
+    public function login(Request $request)
+    {
+        // 1. Validasi inputan dari form darurat tadi
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        // 2. Coba cocokin KTP (email & password) ke database
+        if (Auth::attempt($credentials)) {
+            // Kalau cocok, buatin sesi login (biar gak gampang di-hack)
+            $request->session()->regenerate();
+
+            // Pas login sukses, tendang ke Beranda, bukan langsung ke Chat
+            return redirect()->intended('/beranda'); 
+        }
+
+        // 3. Kalau email/password salah, balikin ke form login
+        return back()->withErrors([
+            'email' => 'Email atau password salah bro!',
+        ]);
+    }
+    
+    // Jangan lupa bikin fungsi logout sekalian biar gampang ngetes ganti akun
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/login');
+    }
 }

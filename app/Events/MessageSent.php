@@ -14,13 +14,15 @@ class MessageSent implements \Illuminate\Contracts\Broadcasting\ShouldBroadcastN
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public $username;
     public $message;
 
     /**
      * Create a new event instance.
      */
-    public function __construct($message)
+    public function __construct($username, $message)
     {
+        $this->username = $username;
         $this->message = $message;
     }
 
@@ -32,7 +34,7 @@ class MessageSent implements \Illuminate\Contracts\Broadcasting\ShouldBroadcastN
     public function broadcastOn(): array
     {
         return [
-            new \Illuminate\Broadcasting\Channel('chat-channel'),
+            new PrivateChannel('chat-channel'), // Tambahin kata 'Private'
         ];
     }
 
