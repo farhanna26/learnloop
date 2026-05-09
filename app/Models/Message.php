@@ -13,11 +13,17 @@ class Message extends Model
 
     // 1. Kolom yang boleh diisi
     // PASTIKAN di phpMyAdmin/Migration lu nama kolomnya emang 'message', bukan 'text'!
-    protected $fillable = ['username', 'text'];
+    protected $fillable = ['room_id', 'username', 'text'];
 
     // 2. Relasi ke User
     public function user()
     {
         return $this->belongsTo(User::class, 'username');
+    }
+
+    // 3. Relasi ke Room
+    public function room()
+    {
+        return $this->belongsTo(Room::class);
     }
 }

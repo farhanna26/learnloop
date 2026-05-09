@@ -16,14 +16,16 @@ class MessageSent implements \Illuminate\Contracts\Broadcasting\ShouldBroadcastN
 
     public $username;
     public $message;
+    public $roomId;
 
     /**
      * Create a new event instance.
      */
-    public function __construct($username, $message)
+    public function __construct($username, $message, $roomId)
     {
         $this->username = $username;
         $this->message = $message;
+        $this->roomId = $roomId;
     }
 
     /**
@@ -33,8 +35,9 @@ class MessageSent implements \Illuminate\Contracts\Broadcasting\ShouldBroadcastN
      */
     public function broadcastOn(): array
     {
+        // Jalurnya sekarang spesifik ke kamar masing-masing!
         return [
-            new PrivateChannel('chat-channel'), // Tambahin kata 'Private'
+            new PrivateChannel('chat.room.' . $this->roomId), 
         ];
     }
 
