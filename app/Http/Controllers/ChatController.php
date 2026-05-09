@@ -23,7 +23,8 @@ class ChatController extends Controller
 {
     // 1. Validasi
     $request->validate([
-        'message' => 'required|string' 
+        'message' => 'required|string', // Wajib ngisi pesan
+        'room_id' => 'required|exists:rooms,id', // Wajib ngirim ID kamar!
     ]);
 
     // 2. Proteksi kalau belum login (biar gak error null pointer)
@@ -37,12 +38,13 @@ class ChatController extends Controller
         // 3. Simpan ke database
         // Pastiin di tabel messages lu emang ada kolom 'user_id' dan 'message'
         $chat = Message::create([
+            'room_id'  => $request->room_id,
             'username' => $user->name,
             'text' => $request->message,
         ]);
 
         // 4. Kirim sinyal (Urutannya: Nama, baru Pesan)
-        broadcast(new MessageSent($user->name, $request->message));
+        broadcast(new MessageSent($user->name, $request->message, $request->room_id));
 
         return response()->json(['status' => 'success']);
         
