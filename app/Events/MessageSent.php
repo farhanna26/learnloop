@@ -3,7 +3,7 @@
 namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
-use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\InteractsWithSockets;  
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -14,14 +14,18 @@ class MessageSent implements \Illuminate\Contracts\Broadcasting\ShouldBroadcastN
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public $username;
     public $message;
+    public $roomId;
 
     /**
      * Create a new event instance.
      */
-    public function __construct($message)
+    public function __construct($username, $message, $roomId)
     {
+        $this->username = $username;
         $this->message = $message;
+        $this->roomId = $roomId;
     }
 
     /**
@@ -31,8 +35,9 @@ class MessageSent implements \Illuminate\Contracts\Broadcasting\ShouldBroadcastN
      */
     public function broadcastOn(): array
     {
+        // Jalurnya sekarang spesifik ke kamar masing-masing!
         return [
-            new \Illuminate\Broadcasting\Channel('chat-channel'),
+            new PrivateChannel('chat.room.' . $this->roomId), 
         ];
     }
 
