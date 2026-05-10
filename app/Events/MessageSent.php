@@ -10,6 +10,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
+// Pastiin bagian atas filenya udah pake ini
 class MessageSent implements \Illuminate\Contracts\Broadcasting\ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
@@ -18,9 +19,6 @@ class MessageSent implements \Illuminate\Contracts\Broadcasting\ShouldBroadcastN
     public $message;
     public $roomId;
 
-    /**
-     * Create a new event instance.
-     */
     public function __construct($username, $message, $roomId)
     {
         $this->username = $username;
@@ -28,24 +26,15 @@ class MessageSent implements \Illuminate\Contracts\Broadcasting\ShouldBroadcastN
         $this->roomId = $roomId;
     }
 
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return array<int, Channel>
-     */
     public function broadcastOn(): array
     {
-        // Jalurnya sekarang spesifik ke kamar masing-masing!
         return [
             new PrivateChannel('chat.room.' . $this->roomId), 
         ];
     }
 
-    /**
-     * The event's broadcast name.
-     */
     public function broadcastAs(): string
     {
-        return 'message.sent';
+        return 'message.sent'; // Label surat lu
     }
 }

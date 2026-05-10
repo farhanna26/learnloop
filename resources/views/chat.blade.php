@@ -44,61 +44,66 @@
     </div>
 
     <script type="module">
-        const chatBox = document.getElementById('chat-box');
-        const chatForm = document.getElementById('chat-form');
-        const textInput = document.getElementById('message-text');
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const chatBox = document.getElementById('chat-box');
+    const chatForm = document.getElementById('chat-form');
+    const textInput = document.getElementById('message-text');
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        // Auto-scroll ke bawah saat loading awal
+    // 1. SUNTIK DATA DARI LARAVEL KE JAVASCRIPT (WAJIB ADA INI!)
+    const roomId = {{ $room->id }};
+
+    // Auto-scroll ke bawah saat loading awal
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    // 2. MENDENGARKAN REAL-TIME BROADCAST (PRIVATE CHANNEL)
+    // Kita pake .private biar chat antar ruangan nggak nyampur/bocor
+    // SEBELUMNYA: .listen('MessageSent', (e) => {
+    // SESUDAHNYA (Pake titik dan sesuaikan sama broadcastAs):
+    window.Echo.private(`chat.room.${roomId}`)
+    .listen('.message.sent', (e) => { // Perhatikan titik di depan 'message.sent'
+        console.log('Ada pesan masuk:', e); // Buat debug di console
+        const newChat = document.createElement('div');
+        newChat.className = 'bg-white p-3 rounded shadow-sm border border-gray-200 mb-3';
+        
+        newChat.innerHTML = `
+            <span class="font-bold text-blue-600">${e.username}:</span> 
+            <span class="text-gray-800">${e.message}</span>
+        `;
+        
+        chatBox.appendChild(newChat);
         chatBox.scrollTop = chatBox.scrollHeight;
+    });
 
-        // 1. MENDENGARKAN REAL-TIME BROADCAST (REVERB/PUSHER)
-        window.Echo.channel('chat-channel')
-            .listen('.message.sent', (e) => {
-                const newChat = document.createElement('div');
-                newChat.className = 'bg-white p-3 rounded shadow-sm border border-gray-200 mb-3';
-                
-                // Pastikan struktur e.username dan e.message sesuai dengan Event MessageSent.php kamu
-                newChat.innerHTML = `
-                    <span class="font-bold text-blue-600">${e.username}:</span> 
-                    <span class="text-gray-800">${e.message}</span>
-                `;
-                
-                chatBox.appendChild(newChat);
-                chatBox.scrollTop = chatBox.scrollHeight;
-            });
+    // 3. MENGIRIM PESAN
+    chatForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const text = textInput.value;
+        if (!text.trim()) return;
 
-        // 2. MENGIRIM PESAN
-        chatForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const text = textInput.value;
-            if (!text.trim()) return; // Jangan kirim kalau kosong
-
-            fetch('/chat/send', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
-                },
-                // Kirim pesannya dan kirim ID kamarnya!
-                body: JSON.stringify({
-                    message: text,
-                    room_id: roomId 
-                })
+        fetch('/chat/send', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                message: text,
+                room_id: roomId // Sekarang roomId udah aman karena didefinisikan di atas
             })
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
-            })
-            .then(data => {
-                textInput.value = ''; // Kosongkan input setelah sukses
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Gagal mengirim pesan. Coba lagi.');
-            });
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
+        .then(data => {
+            textInput.value = ''; // Kosongkan input
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Gagal mengirim pesan. Coba lagi.');
         });
-    </script>
+    });
+</script>
 </body>
 </html>

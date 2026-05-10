@@ -6,6 +6,10 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 
+Route::get('/', function () {
+    return view('landing');
+})->name('landing');
+
 // --- ZONA SATPAM (Wajib Login) ---
 // Pakai middleware 'auth' buat ngecek sesi login
 Route::middleware('auth')->group(function () {
@@ -38,6 +42,11 @@ Route::middleware('auth')->group(function () {
 Route::get('/login', function () {
     return view('auth.login'); // Sesuaikan sama file blade bikinan kawan lu
 })->name('login');
+
+// Rute buat nampilin halaman form register
+Route::get('/register', function () {
+    return view('auth.register'); // Pastiin kawan lu udah bikin file register.blade.php di dalem folder auth
+})->name('register');
 
 // 2. Rute POST yang lu bikin tadi tetep dibiarin aja di bawahnya
 Route::post('/login', [AuthController::class, 'login']);
