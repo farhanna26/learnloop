@@ -5,32 +5,31 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PostController; // Import PostController
 
 Route::get('/', function () {
     return view('landing');
 })->name('landing');
 
 // --- ZONA SATPAM (Wajib Login) ---
-// Pakai middleware 'auth' buat ngecek sesi login
 Route::middleware('auth')->group(function () {
-    // 1. Rute Beranda (Feed Utama)
+    // 1. Rute Beranda & Kontak
     Route::get('/beranda', function() {
-        return view('beranda'); // Nanti Nabila bikin piring beranda.blade.php
+        return view('beranda'); 
     })->name('beranda');
-
-    // Rute Daftar Kontak
     Route::get('/contacts', [ChatController::class, 'contactList']);
-
-    // RUTE SEARCH BARU LU TARUH SINI
     Route::get('/search', [UserController::class, 'search']);
 
-    // 2. Rute Chat (Nanti diakses lewat tombol di sidebar)
+    // 2. === RUTE POSTINGAN LEARNLOOP ===
+    Route::get('/posts/fetch', [PostController::class, 'index']); 
+    Route::post('/posts', [PostController::class, 'store']);
+    Route::post('/posts/{id}/comment', [PostController::class, 'storeComment']);
+    Route::post('/posts/{id}/like', [PostController::class, 'toggleLike']);
+
+    // 3. === RUTE CHAT ===
     Route::get('/chat/private/{targetUserId}', [ChatController::class, 'createOrFindPrivateChat']);
     Route::get('/chat/{roomId}', [ChatController::class, 'index']);
     Route::post('/chat/send', [ChatController::class, 'store']);
-
-    // 3. Rute Profil Diri Sendiri (Pojok Kiri Atas)
-    // Nanti narik data dari PortfolioController
 });
 
 

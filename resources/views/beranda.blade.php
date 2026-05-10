@@ -50,11 +50,11 @@
             <aside class="hidden lg:col-span-3 lg:block">
                 <div class="sticky top-28 space-y-4">
                     <nav class="space-y-1">
-                        <a href="#" class="group flex items-center gap-3 rounded-2xl bg-violet-50 px-4 py-3 text-sm font-bold text-violet-700 transition-all">
+                        <a href="/beranda" class="group flex items-center gap-3 rounded-2xl bg-violet-50 px-4 py-3 text-sm font-bold text-violet-700 transition-all">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                             Beranda
                         </a>
-                        <a href="#" class="group flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">
+                        <a href="/contacts" class="group flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">
                             <div class="flex items-center gap-3">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                                 Pesan
@@ -153,7 +153,7 @@
                 
                 <div class="mx-5 mb-5 overflow-hidden rounded-2xl bg-slate-100 flex items-center justify-center">
                     ${isImage ? `
-                        <img src="${filePath}" class="w-full h-auto object-cover max-h-[500px]" onerror="this.parentElement.innerHTML='<p class=\"p-4 text-xs text-slate-400\">Gambar tidak dapat dimuat</p>'">
+                        <img src="${filePath}" class="w-full h-auto object-cover max-h-[500px]" onerror="this.parentElement.innerHTML='<p class=&quot;p-4 text-xs text-slate-400&quot;>Gambar tidak dapat dimuat</p>'">
                     ` : ''}
 
                     ${isVideo ? `
@@ -189,7 +189,7 @@
             loadingIndicator.classList.remove('hidden');
 
             try {
-                const response = await fetch(`/api/posts/fetch?offset=${offset}&limit=${limit}`);
+                const response = await fetch(`/posts/fetch?offset=${offset}&limit=${limit}`);
                 const result = await response.json();
 
                 if (result.success && result.data.length > 0) {
@@ -266,7 +266,7 @@
             formData.append('image', file);
 
             try {
-                const response = await fetch('/api/posts', {
+                const response = await fetch('/posts', {
                     method: 'POST',
                     body: formData,
                     headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '' }

@@ -11,9 +11,18 @@ use Illuminate\Support\Facades\Auth;
 class PostController extends Controller
 {
     // Mengambil semua postingan (Feed)
-    public function index()
+    // Mengambil semua postingan (Feed) dengan Paginasi
+    public function index(Request $request)
     {
-        $posts = Post::with(['user', 'comments.user'])->withCount('likes')->latest()->get();
+        $offset = $request->query('offset', 0);
+        $limit = $request->query('limit', 5);
+
+        $posts = Post::with(['user', 'comments.user'])
+                    ->withCount('likes')
+                    ->latest()
+                    ->skip($offset) 
+                    ->take($limit)  
+                    ->get();
         
         return response()->json([
             'success' => true,
@@ -44,9 +53,9 @@ class PostController extends Controller
 
         // 3. Simpan ke database
         $post = Post::create([
-            'user_id' => 1, // Sementara hardcode ID 1
+            'user_id' => auth()->id(), // <--- GANTI JADI INI BIAR GAK HARDCODE LAGI
             'content' => $request->content,
-            'image'   => $imagePath, // Masukkan path file ke kolom image
+            'image'   => $imagePath, 
         ]);
 
         // Load relasi user agar tampilan di frontend langsung muncul namanya
@@ -58,18 +67,6 @@ class PostController extends Controller
             'data'    => $post
         ], 201);
     }
-
-    // database/migrations/xxxx_create_posts_table.php
-public function up()
-{
-    Schema::create('posts', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Terikat ke akun user
-        $table->text('content'); // Untuk caption
-        $table->string('image'); // Untuk menyimpan path/nama file (PDF/Video/Foto)
-        $table->timestamps(); // Menyimpan kapan data dibuat
-    });
-}
 
     // Menambah Komentar
     public function storeComment(Request $request, $postId)
