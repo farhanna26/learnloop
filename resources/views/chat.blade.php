@@ -12,9 +12,9 @@
 <body class="bg-gray-100 h-screen flex flex-col items-center justify-center">
 
     <div class="w-full max-w-2xl bg-white rounded-lg shadow-xl overflow-hidden flex flex-col h-[80vh]">
-        <div class="bg-blue-600 text-white px-4 py-3 font-bold text-lg flex justify-between items-center">
-            <span>LearnLoop Real-time Room</span>
-            <span class="text-xs bg-blue-500 px-2 py-1 rounded">Private VIP</span>
+        <div class="bg-blue-600 text-white px-4 py-3 font-bold text-lg flex justify-between">
+            <span>LearnLoop Room: {{ $room->name ?? 'Private Chat' }}</span>
+            <span class="text-sm font-normal bg-blue-800 px-2 rounded">Room ID: {{ $room->id }}</span>
         </div>
 
         <div id="chat-box" class="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50">
@@ -81,8 +81,10 @@
                     'X-CSRF-TOKEN': csrfToken,
                     'Accept': 'application/json'
                 },
+                // Kirim pesannya dan kirim ID kamarnya!
                 body: JSON.stringify({
-                    message: text
+                    message: text,
+                    room_id: roomId 
                 })
             })
             .then(response => {
