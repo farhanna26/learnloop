@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\AuthController;
 
@@ -30,6 +31,35 @@ Route::middleware('auth')->group(function () {
 Route::get('/login', function () {
     return view('auth.login'); // Sesuaikan sama file blade bikinan kawan lu
 })->name('login');
+
+Route::get('/', function () {
+    return Auth::check()
+        ? redirect()->route('beranda')
+        : view('landing');
+});
+
+// 1. Ini rute buat NAMPILIN halaman form loginnya. 
+// TANDA ->name('login') INI YANG PALING PENTING BIAR SATPAMNYA GAK BINGUNG!
+Route::get('/login', function () {
+    return view('auth.login'); // Sesuaikan sama file blade bikinan kawan lu
+})->name('login');
+
+Route::get('/register', function () {
+    return view('auth.register');
+})->name('register');
+
+// Pastikan ada route dengan nama 'landing'
+Route::get('/', function () {
+    return view('landing');
+})->name('landing');
+
+// Proses Login
+Route::post('/login', [AuthController::class, 'login']);
+
+// Halaman Home
+Route::get('/home', function () {
+    return view('home'); // Sesuaikan dengan nama file blade home kamu
+})->name('home');
 
 // 2. Rute POST yang lu bikin tadi tetep dibiarin aja di bawahnya
 Route::post('/login', [AuthController::class, 'login']);
