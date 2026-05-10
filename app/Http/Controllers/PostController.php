@@ -22,6 +22,25 @@ class PostController extends Controller
         ], 200);
     }
 
+    // Fetch posts untuk infinite scroll
+    public function fetchPosts(Request $request)
+    {
+        $offset = $request->query('offset', 0);
+        $limit = $request->query('limit', 3);
+
+        $posts = Post::with(['user', 'comments.user'])
+            ->withCount('likes')
+            ->latest()
+            ->offset($offset)
+            ->limit($limit)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $posts
+        ], 200);
+    }
+
     // Membuat postingan baru
     public function store(Request $request)
     {
