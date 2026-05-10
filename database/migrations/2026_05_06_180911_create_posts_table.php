@@ -17,6 +17,7 @@ return new class extends Migration
         $table->text('content');
         $table->string('image')->nullable(); // Opsional jika ada gambar
         $table->timestamps();
+        
     });
 }
 
