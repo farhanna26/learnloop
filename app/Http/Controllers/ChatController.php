@@ -11,16 +11,29 @@ use Illuminate\Support\Facades\Auth;
 
 class ChatController extends Controller
 {
-    // 1. Nampilin Isi Chat di Room Tertentu
+    // 1. Nampilin Isi Chat di Room Tertentu (UDAH DI-UPDATE NAMA HEADER-NYA)
     public function index($roomId) 
     {
-        $room = Room::findOrFail($roomId);
+        // Panggil room sekalian sama data user di dalemnya biar bisa dicari namanya
+        $room = Room::with('users')->findOrFail($roomId);
 
         $messages = Message::with('user')
                         ->where('room_id', $roomId)
                         ->get(); 
 
-        return view('chat', compact('messages', 'room'));
+        // LOGIKA PENENTUAN NAMA HEADER CHAT
+        $chatTitle = 'Ruang Obrolan';
+        if ($room->type === 'private') {
+            // Kalau private, cari nama user yang ID-nya BUKAN ID lu
+            $otherUser = $room->users->where('id', '!=', auth()->id())->first();
+            $chatTitle = $otherUser ? $otherUser->name : 'User Tidak Diketahui';
+        } else {
+            // Kalau grup, tampilin nama grupnya
+            $chatTitle = $room->name ?? 'Grup Tanpa Nama';
+        }
+
+        // Kirim variabel $chatTitle ke Blade
+        return view('chat', compact('messages', 'room', 'chatTitle'));
     }
 
     // 2. Fungsi Kirim Pesan
@@ -53,7 +66,7 @@ class ChatController extends Controller
         }
     }
 
-    // 3. Resepsionis: Cari atau Bikin Kamar Private (INI YANG ILANG TADI)
+    // 3. Resepsionis: Cari atau Bikin Kamar Private
     public function createOrFindPrivateChat($targetUserId)
     {
         $myId = auth()->id();
@@ -82,7 +95,7 @@ class ChatController extends Controller
         return redirect('/chat/' . $room->id);
     }
 
-    // 4. Daftar Kontak & Grup (INI JUGA ILANG TADI)
+    // 4. Daftar Kontak & Grup
     public function contactList()
     {
         $myId = auth()->id();

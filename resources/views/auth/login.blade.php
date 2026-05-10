@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | LearnLoop</title>
+    <title>Masuk | LearnLoop</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -39,8 +39,8 @@
 
         <div class="bg-white rounded-[32px] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-slate-100">
             <div class="text-center mb-8">
-                <h2 class="text-2xl font-extrabold text-slate-900">Login Darurat</h2>
-                <p class="text-slate-500 text-sm mt-1">Backend Testing Mode</p>
+                <h2 class="text-2xl font-extrabold text-slate-900">Selamat Datang! 👋</h2>
+                <p class="text-slate-500 text-sm mt-1">Yuk, masuk buat lanjutin diskusi dan tugasmu.</p>
             </div>
 
             @if ($errors->any())
@@ -54,7 +54,7 @@
                 @csrf 
 
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Email Address</label>
+                    <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Email Mahasiswa</label>
                     <input type="email" name="email" required
                         class="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-violet-100 focus:border-violet-400 outline-none transition-all text-slate-900 placeholder:text-slate-400"
                         placeholder="nama@email.com">
@@ -70,14 +70,21 @@
                 <div class="pt-2">
                     <button type="submit" 
                         class="w-full py-4 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-2xl shadow-xl shadow-violet-200 transition-all active:scale-[0.98]">
-                        Gass Login!
+                        Masuk Sekarang
                     </button>
                 </div>
             </form>
 
-            <div class="mt-8 pt-6 border-t border-slate-100 text-center">
+            <div class="mt-6 text-center">
+                <p class="text-sm text-slate-500 font-medium">
+                    Belum punya akun? 
+                    <a href="/register" class="text-violet-600 font-bold hover:underline">Daftar di sini</a>
+                </p>
+            </div>
+
+            <div class="mt-6 pt-6 border-t border-slate-100 text-center">
                 <a href="/" class="text-sm font-bold text-slate-400 hover:text-violet-600 transition">
-                    &larr; Kembali ke Landing
+                    &larr; Kembali ke Halaman Utama
                 </a>
             </div>
         </div>
