@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\AuthController;
 
+// URL: /
+
+
 // --- ZONA SATPAM (Wajib Login) ---
 // Pakai middleware 'auth' buat ngecek sesi login
 Route::middleware('auth')->group(function () {
