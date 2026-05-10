@@ -22,36 +22,35 @@ class PostController extends Controller
         ], 200);
     }
 
-    // Fetch posts untuk infinite scroll
-    public function fetchPosts(Request $request)
-    {
-        $offset = $request->query('offset', 0);
-        $limit = $request->query('limit', 3);
-
-        $posts = Post::with(['user', 'comments.user'])
-            ->withCount('likes')
-            ->latest()
-            ->offset($offset)
-            ->limit($limit)
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $posts
-        ], 200);
-    }
-
     // Membuat postingan baru
+   // Membuat postingan baru
     public function store(Request $request)
     {
+        // 1. Validasi (tambahkan rule untuk image)
         $request->validate([
-            'content' => 'required',
+            'content' => 'required|string',
+            'image' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,pdf|max:10240', // Max 10MB
         ]);
 
+        $imagePath = null;
+
+        // 2. Logika simpan file fisik
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            // Simpan ke folder 'storage/app/public/posts'
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $imagePath = $file->storeAs('posts', $filename, 'public');
+        }
+
+        // 3. Simpan ke database
         $post = Post::create([
-            'user_id' => 1, // Sementara hardcode ID 1 sebelum sistem login aktif
+            'user_id' => 1, // Sementara hardcode ID 1
             'content' => $request->content,
+            'image'   => $imagePath, // Masukkan path file ke kolom image
         ]);
+
+        // Load relasi user agar tampilan di frontend langsung muncul namanya
+        $post->load('user');
 
         return response()->json([
             'success' => true,
@@ -59,6 +58,18 @@ class PostController extends Controller
             'data'    => $post
         ], 201);
     }
+
+    // database/migrations/xxxx_create_posts_table.php
+public function up()
+{
+    Schema::create('posts', function (Blueprint $table) {
+        $table->id();
+        $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Terikat ke akun user
+        $table->text('content'); // Untuk caption
+        $table->string('image'); // Untuk menyimpan path/nama file (PDF/Video/Foto)
+        $table->timestamps(); // Menyimpan kapan data dibuat
+    });
+}
 
     // Menambah Komentar
     public function storeComment(Request $request, $postId)
