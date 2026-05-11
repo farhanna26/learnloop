@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 class ChatController extends Controller
 {
     // 1. Nampilin Isi Chat di Room Tertentu (UDAH DI-UPDATE NAMA HEADER-NYA)
-    public function index($roomId) 
+    public function index(int $roomId)
     {
         // Panggil room sekalian sama data user di dalemnya biar bisa dicari namanya
         $room = Room::with('users')->findOrFail($roomId);
@@ -25,7 +25,7 @@ class ChatController extends Controller
         $chatTitle = 'Ruang Obrolan';
         if ($room->type === 'private') {
             // Kalau private, cari nama user yang ID-nya BUKAN ID lu
-            $otherUser = $room->users->where('id', '!=', auth()->id())->first();
+            $otherUser = $room->users->where('id', '!=', Auth::id())->first();
             $chatTitle = $otherUser ? $otherUser->name : 'User Tidak Diketahui';
         } else {
             // Kalau grup, tampilin nama grupnya
@@ -44,11 +44,11 @@ class ChatController extends Controller
             'room_id' => 'required|exists:rooms,id',
         ]);
 
-        if (!auth()->check()) {
+        if (!Auth::check()) {
             return response()->json(['error' => 'Woi, login dulu!'], 401);
         }
 
-        $user = auth()->user();
+        $user = Auth::user();
 
         try {
             $chat = Message::create([
@@ -67,9 +67,9 @@ class ChatController extends Controller
     }
 
     // 3. Resepsionis: Cari atau Bikin Kamar Private
-    public function createOrFindPrivateChat($targetUserId)
+    public function createOrFindPrivateChat(int $targetUserId)
     {
-        $myId = auth()->id();
+        $myId = Auth::id();
 
         if ($myId == $targetUserId) {
             return back()->with('error', 'Gak bisa ngechat diri sendiri bos!');
@@ -98,7 +98,7 @@ class ChatController extends Controller
     // 4. Daftar Kontak & Grup
     public function contactList()
     {
-        $myId = auth()->id();
+        $myId = Auth::id();
 
         $users = User::where('id', '!=', $myId)->get();
 

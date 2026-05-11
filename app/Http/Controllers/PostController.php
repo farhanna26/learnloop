@@ -15,7 +15,7 @@ class PostController extends Controller
     {
         $offset = $request->query('offset', 0);
         $limit = $request->query('limit', 5);
-        $userId = auth()->id();
+        $userId = Auth::id();
 
         $posts = Post::with(['user', 'comments.user'])
                     ->withCount('likes')
@@ -53,7 +53,7 @@ class PostController extends Controller
         }
 
         $post = Post::create([
-            'user_id' => auth()->id(), // AMAN DARI HARDCODE
+            'user_id' => Auth::id(), // AMAN DARI HARDCODE
             'content' => $request->content,
             'image'   => $imagePath, 
         ]);
@@ -74,16 +74,18 @@ class PostController extends Controller
     }
 
     // Menambah Komentar
-    public function storeComment(Request $request, $postId)
+    public function storeComment(Request $request, int $postId)
     {
+        $post = Post::findOrFail($postId);
+
         $request->validate([
             'body' => 'required|string',
             'parent_id' => 'nullable|exists:comments,id' // Validasi parent_id kalau ada
         ]);
 
         $comment = Comment::create([
-            'user_id' => auth()->id(),
-            'post_id' => $postId,
+            'user_id' => Auth::id(),
+            'post_id' => $post->id,
             'parent_id' => $request->parent_id, // Masukin parent_id-nya
             'body'    => $request->body
         ]);
@@ -98,9 +100,9 @@ class PostController extends Controller
     }
 
     // Sistem Toggle Like (Like/Unlike)
-    public function toggleLike($postId)
+    public function toggleLike(int $postId)
     {
-        $userId = auth()->id(); // AMAN DARI HARDCODE
+        $userId = Auth::id(); // AMAN DARI HARDCODE
         $existingLike = Like::where('user_id', $userId)->where('post_id', $postId)->first();
 
         if ($existingLike) {
