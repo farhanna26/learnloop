@@ -59,29 +59,33 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::post('/addprofile', function (Request $request) {
-        $user = Auth::user();
-        
-        $validated = $request->validate([
-            'description' => 'nullable|string|max:500',
-            'photo' => 'nullable|image|max:2048',
-        ]);
+    $user = Auth::user();
+    
+    $validated = $request->validate([
+        'description' => 'nullable|string|max:500',
+        'photo' => 'nullable|image|max:2048',
+        'banner' => 'nullable|image|max:3072', // Banner biasanya lebih gede sizenya
+    ]);
 
-        if ($request->hasFile('photo')) {
-            $photo = $request->file('photo');
-            $filename = time() . '_' . $photo->getClientOriginalName();
-            $destination = public_path('profile-photos');
-            
-            if (!is_dir($destination)) {
-                mkdir($destination, 0755, true);
-            }
-            
-            $photo->move($destination, $filename);
-            $user->photo = 'profile-photos/' . $filename;
-        }
+    // Logika Simpan Foto Profil (Tetap Sama)
+    if ($request->hasFile('photo')) {
+        $photo = $request->file('photo');
+        $filename = 'photo_' . time() . '.' . $photo->getClientOriginalExtension();
+        $photo->move(public_path('profile-photos'), $filename);
+        $user->photo = 'profile-photos/' . $filename;
+    }
 
-        $user->description = $validated['description'] ?? $user->description;
-        $user->save();
+    // LOGIKA BARU: Simpan Banner
+    if ($request->hasFile('banner')) {
+        $banner = $request->file('banner');
+        $filename = 'banner_' . time() . '.' . $banner->getClientOriginalExtension();
+        $banner->move(public_path('profile-banners'), $filename); // Kita pisah foldernya biar rapi
+        $user->banner = 'profile-banners/' . $filename;
+    }
 
-        return redirect('/profile')->with('success', 'Profil berhasil disimpan.');
-    });
+    $user->description = $validated['description'];
+    $user->save();
+
+    return redirect('/profile')->with('success', 'Berhasil Edit Profile');
+});
 });

@@ -9,31 +9,30 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
-    // 1. Fungsi buat Daftar Akun Baru (Register)
     public function register(Request $request)
     {
-        // Validasi data yang dikirim dari frontend
+        // 1. Validasi tetap sama
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            // Tambahin validasi role biar user gak bisa ngirim role ngasal (harus creator/learner)
             'role' => 'required|in:creator,learner', 
         ]);
 
-        // Simpan user baru ke database
+        // 2. Simpan user
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            // Masukin data rolenya ke database
             'role' => $request->role,
         ]);
 
-        // Langsung login-in usernya abis daftar
+        // 3. Langsung login-in biar sat-set
         Auth::login($user);
 
-        return response()->json(['status' => 'success', 'message' => 'Akun berhasil dibuat sebagai ' . $request->role . '!']);
+        // 4. LEMPAR KE BERANDA (Bukan JSON lagi!)
+        // Kita bawa pesan 'success' pake session flash
+        return redirect()->route('beranda')->with('success', 'Selamat Datang! Akun ' . $request->role . ' berhasil dibuat.');
     }
 
     // INI FUNGSI YANG DICARIIN SAMA LARAVEL TADI!

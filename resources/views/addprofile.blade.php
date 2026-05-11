@@ -1,201 +1,82 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Edit Profile</title>
-<style>
-:root {
-  --bg: #ffffff;
-  --surface: #f7f5ff;
-  --border: #e6dcff;
-  --text: #1c1c1c;
-  --muted: #6b5b8c;
-  --accent: #b794f4;
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  font-family: 'DM Sans', sans-serif;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #faf8ff;
-  color: var(--text);
-  padding: 24px;
-}
-
-.page {
-  width: 100%;
-  max-width: 520px;
-  background: #ffffff;
-  border: 1px solid var(--border);
-  border-radius: 28px;
-  box-shadow: 0 28px 80px rgba(120, 87, 255, 0.08);
-  padding: 32px;
-}
-
-h1 {
-  margin: 0 0 10px;
-  font-size: 1.85rem;
-}
-
-.note {
-  margin: 0 0 24px;
-  color: var(--muted);
-  line-height: 1.6;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-label {
-  display: block;
-  margin-bottom: 10px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-input[type=file], textarea {
-  width: 100%;
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-  padding: 14px 16px;
-  font: 1rem/1.5 sans-serif;
-}
-
-textarea {
-  min-height: 140px;
-  resize: vertical;
-}
-
-.preview {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.photo {
-  width: 96px;
-  height: 96px;
-  border-radius: 50%;
-  background: #f1f0ff;
-  border: 2px solid var(--border);
-  background-size: cover;
-  background-position: center;
-}
-
-.info {
-  min-width: 0;
-}
-
-.info strong {
-  display: block;
-  margin-bottom: 6px;
-  color: var(--text);
-}
-
-.info span {
-  color: var(--muted);
-  line-height: 1.6;
-}
-
-button {
-  width: 100%;
-  border: none;
-  border-radius: 16px;
-  padding: 14px 18px;
-  font: 600 1rem/1.2 sans-serif;
-  background: var(--accent);
-  color: #fff;
-  cursor: pointer;
-  transition: background .2s ease;
-}
-
-button:hover {
-  background: #9f7aea;
-}
-
-.alert {
-  margin-bottom: 18px;
-  padding: 14px 16px;
-  border-radius: 16px;
-  background: #ecfdf5;
-  color: #065f46;
-  border: 1px solid #a7f3d0;
-}
-
-.error-list {
-  margin-bottom: 18px;
-  padding: 14px 16px;
-  border-radius: 16px;
-  background: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid #fecaca;
-}
-
-.error-list li {
-  margin-bottom: 8px;
-}
-
-.link-back {
-  display: inline-block;
-  margin-top: 20px;
-  color: var(--accent);
-  text-decoration: none;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profil | LearnLoop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .glass-effect { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
+    </style>
 </head>
-<body>
-<div class="page">
-  <h1>Edit Profile</h1>
-  <p class="note">Foto profil dan deskripsi bersifat opsional. Biarkan kosong jika tidak ingin mengubah.</p>
+<body class="flex items-center justify-center min-h-screen p-4">
 
-  @if(session('success'))
-    <div class="alert">{{ session('success') }}</div>
-  @endif
+    <div class="w-full max-w-2xl bg-white rounded-[32px] border border-slate-200 shadow-2xl overflow-hidden animate-fade-in">
+        <div class="p-8 border-b border-slate-100 flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-extrabold text-slate-900">Edit Profil</h1>
+                <p class="text-sm text-slate-500">Sesuaikan tampilan profil LearnLoop-mu</p>
+            </div>
+            <a href="/profile" class="text-sm font-bold text-slate-400 hover:text-violet-600 transition">Batal</a>
+        </div>
 
-  @if($errors->any())
-    <div class="error-list">
-      <strong>Perbaiki dulu:</strong>
-      <ul>
-        @foreach($errors->all() as $error)
-          <li>{{ $error }}</li>
-        @endforeach
-      </ul>
+        <form action="/addprofile" method="POST" enctype="multipart/form-data" class="p-8 space-y-8">
+            @csrf
+            
+            <div class="space-y-3">
+                <label class="text-sm font-bold text-slate-700 ml-1">Banner Profil (Header)</label>
+                <div class="relative h-40 w-full rounded-3xl bg-slate-100 border-2 border-dashed border-slate-200 overflow-hidden group">
+                    <img id="banner-preview" src="{{ $user->banner ? asset($user->banner) : '' }}" class="w-full h-full object-cover {{ $user->banner ? '' : 'hidden' }}">
+                    <div class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/20 group-hover:bg-slate-900/40 transition-all">
+                        <label for="banner" class="cursor-pointer bg-white/90 px-4 py-2 rounded-xl text-xs font-bold shadow-lg hover:scale-105 transition-transform">Ganti Banner</label>
+                    </div>
+                    <input type="file" name="banner" id="banner" class="hidden" accept="image/*" onchange="previewImage(this, 'banner-preview')">
+                </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-8">
+                <div class="space-y-3">
+                    <label class="text-sm font-bold text-slate-700 ml-1">Foto Profil</label>
+                    <div class="relative h-32 w-32 rounded-full bg-slate-100 border-2 border-dashed border-slate-200 group overflow-hidden">
+                        <img id="photo-preview" src="{{ $user->photo ? asset($user->photo) : 'https://ui-avatars.com/api/?name='.urlencode($user->name) }}" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 flex items-center justify-center bg-slate-900/20 opacity-0 group-hover:opacity-100 transition-all">
+                            <label for="photo" class="cursor-pointer p-2 bg-white rounded-full shadow-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                            </label>
+                        </div>
+                        <input type="file" name="photo" id="photo" class="hidden" accept="image/*" onchange="previewImage(this, 'photo-preview')">
+                    </div>
+                </div>
+
+                <div class="flex-1 space-y-3">
+                    <label class="text-sm font-bold text-slate-700 ml-1">Deskripsi Diri (Bio)</label>
+                    <textarea name="description" rows="4" class="w-full rounded-3xl border border-slate-200 bg-slate-50 p-5 text-sm outline-none focus:bg-white focus:border-violet-500 focus:ring-4 focus:ring-violet-100 transition-all" placeholder="Contoh: Mahasiswa Teknik Informatika yang suka main Valorant...">{{ $user->description }}</textarea>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full rounded-2xl bg-violet-600 py-4 text-sm font-extrabold text-white shadow-xl shadow-violet-200 hover:bg-violet-700 hover:-translate-y-1 transition-all active:scale-95">
+                Simpan Perubahan Profil
+            </button>
+        </form>
     </div>
-  @endif
 
-  <form action="{{ url('/addprofile') }}" method="post" enctype="multipart/form-data">
-    @csrf
+    <script>
+        function previewImage(input, previewId) {
+            const preview = document.getElementById(previewId);
+            const file = input.files[0];
+            const reader = new FileReader();
 
-    <div class="preview">
-      <div class="photo" style="@if($user && $user->photo) background-image:url('{{ asset($user->photo) }}'); @endif"></div>
-      <div class="info">
-        <strong>Foto saat ini</strong>
-        <span style="color:#94a3b8; line-height:1.6;">Pilih file baru jika ingin mengganti.</span>
-      </div>
-    </div>
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+            }
 
-    <div class="form-group">
-      <label for="photo">Unggah foto profil</label>
-      <input id="photo" name="photo" type="file" accept="image/*">
-    </div>
-
-    <div class="form-group">
-      <label for="description">Deskripsi</label>
-      <textarea id="description" name="description" placeholder="Contoh: Mahasiswa Teknik Informatika">{{ old('description', $user->description ?? '') }}</textarea>
-    </div>
-
-    <button type="submit">Simpan profil</button>
-  </form>
-
-  <a class="link-back" href="{{ url('/profile') }}">Kembali ke profil</a>
-</div>
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
 </body>
 </html>
