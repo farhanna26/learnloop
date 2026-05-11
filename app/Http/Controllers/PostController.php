@@ -10,15 +10,20 @@ use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
-    // Mengambil semua postingan (Feed)
-    // Mengambil semua postingan (Feed) dengan Paginasi
+    // Mengambil semua postingan (Feed) dengan Paginasi + Status Like
     public function index(Request $request)
     {
         $offset = $request->query('offset', 0);
         $limit = $request->query('limit', 5);
+        $userId = auth()->id();
 
         $posts = Post::with(['user', 'comments.user'])
                     ->withCount('likes')
+                    ->withCount('comments')
+                    // Cek apakah user yang login udah nge-like postingan ini
+                    ->withExists(['likes as is_liked' => function($query) use ($userId) {
+                        $query->where('user_id', $userId);
+                    }])
                     ->latest()
                     ->skip($offset) 
                     ->take($limit)  
@@ -32,34 +37,34 @@ class PostController extends Controller
     }
 
     // Membuat postingan baru
-   // Membuat postingan baru
     public function store(Request $request)
     {
-        // 1. Validasi (tambahkan rule untuk image)
         $request->validate([
             'content' => 'required|string',
-            'image' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,pdf|max:10240', // Max 10MB
+            'image' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,pdf|max:10240', 
         ]);
 
         $imagePath = null;
 
-        // 2. Logika simpan file fisik
         if ($request->hasFile('image')) {
             $file = $request->file('image');
-            // Simpan ke folder 'storage/app/public/posts'
             $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
             $imagePath = $file->storeAs('posts', $filename, 'public');
         }
 
-        // 3. Simpan ke database
         $post = Post::create([
-            'user_id' => auth()->id(), // <--- GANTI JADI INI BIAR GAK HARDCODE LAGI
+            'user_id' => auth()->id(), // AMAN DARI HARDCODE
             'content' => $request->content,
             'image'   => $imagePath, 
         ]);
 
-        // Load relasi user agar tampilan di frontend langsung muncul namanya
         $post->load('user');
+        
+        // Kasih default value buat UI
+        $post->likes_count = 0;
+        $post->comments_count = 0;
+        $post->is_liked = false;
+        $post->comments = [];
 
         return response()->json([
             'success' => true,
@@ -71,17 +76,23 @@ class PostController extends Controller
     // Menambah Komentar
     public function storeComment(Request $request, $postId)
     {
-        $request->validate(['body' => 'required']);
+        $request->validate([
+            'body' => 'required|string',
+            'parent_id' => 'nullable|exists:comments,id' // Validasi parent_id kalau ada
+        ]);
 
         $comment = Comment::create([
-            'user_id' => 1, 
+            'user_id' => auth()->id(),
             'post_id' => $postId,
+            'parent_id' => $request->parent_id, // Masukin parent_id-nya
             'body'    => $request->body
         ]);
 
+        $comment->load('user');
+
         return response()->json([
             'success' => true,
-            'message' => 'Komentar Berhasil Ditambahkan',
+            'message' => 'Komentar/Balasan Berhasil Ditambahkan',
             'data'    => $comment
         ], 201);
     }
@@ -89,12 +100,12 @@ class PostController extends Controller
     // Sistem Toggle Like (Like/Unlike)
     public function toggleLike($postId)
     {
-        $userId = 1;
+        $userId = auth()->id(); // AMAN DARI HARDCODE
         $existingLike = Like::where('user_id', $userId)->where('post_id', $postId)->first();
 
         if ($existingLike) {
             $existingLike->delete();
-            return response()->json(['message' => 'Unlike berhasil'], 200);
+            return response()->json(['status' => 'unliked', 'message' => 'Unlike berhasil'], 200);
         }
 
         Like::create([
@@ -102,6 +113,6 @@ class PostController extends Controller
             'post_id' => $postId
         ]);
 
-        return response()->json(['message' => 'Like berhasil'], 201);
+        return response()->json(['status' => 'liked', 'message' => 'Like berhasil'], 201);
     }
 }

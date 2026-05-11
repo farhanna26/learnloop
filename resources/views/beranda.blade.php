@@ -18,6 +18,11 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        
+        /* Custom Scrollbar untuk Modal Komentar */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
 <body class="min-h-screen text-slate-900">
@@ -39,7 +44,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14m7-7H5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     Upload
                 </button>
-                <img src="https://ui-avatars.com/api/?name=Yaza&background=8b5cf6&color=ffffff&rounded=true" class="h-9 w-9 rounded-xl shadow-sm" />
+                <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name ?? 'User') }}&background=8b5cf6&color=ffffff&rounded=true" class="h-9 w-9 rounded-xl shadow-sm" />
             </div>
         </div>
     </header>
@@ -93,11 +98,38 @@
     <div id="uploadModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
         <div class="w-full max-w-lg rounded-[32px] bg-white p-8 shadow-2xl">
             <h3 class="text-xl font-bold mb-6">Posting Konten Baru</h3>
-            <div id="previewArea" class="mb-4 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 min-h-[150px] flex items-center justify-center overflow-hidden">
-                </div>
+            <div id="previewArea" class="mb-4 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 min-h-[150px] flex items-center justify-center overflow-hidden"></div>
             <textarea id="captionText" rows="3" class="w-full rounded-2xl border border-slate-200 p-4 text-sm outline-none focus:border-violet-500 transition-all" placeholder="Tulis deskripsi postingan..."></textarea>
             <button id="submitUpload" class="mt-6 w-full rounded-2xl bg-violet-600 py-4 text-sm font-bold text-white hover:bg-violet-700 transition-all">Posting Sekarang</button>
             <button id="closeModal" class="w-full mt-2 text-sm text-slate-400 font-medium py-2 hover:text-slate-600">Batal</button>
+        </div>
+    </div>
+
+    <div id="commentModal" class="fixed inset-0 z-[70] hidden flex items-end justify-center sm:items-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all">
+        <div class="w-full max-w-lg rounded-t-[32px] sm:rounded-[32px] bg-white flex flex-col shadow-2xl overflow-hidden max-h-[80vh]">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white shrink-0">
+                <h3 class="font-bold text-lg text-slate-900">Komentar</h3>
+                <button id="closeCommentModal" class="text-slate-400 hover:text-slate-600 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            
+            <div id="commentsList" class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-5 bg-slate-50">
+                </div>
+
+            <div id="replyInfo" class="hidden px-5 py-2 bg-violet-50 border-x border-t border-slate-100 flex justify-between items-center shrink-0">
+                <p class="text-[10px] font-bold text-violet-600">Membalas: <span id="replyTargetName"></span></p>
+                <button type="button" onclick="cancelReply()" class="text-[10px] text-red-400 hover:text-red-600">Batal</button>
+            </div>
+
+            <div class="p-4 bg-white border-t border-slate-100 shrink-0">
+                <form id="commentForm" class="flex items-center gap-3">
+                    <input type="text" id="commentInput" placeholder="Tulis komentar..." class="w-full bg-slate-100 border-transparent focus:bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 rounded-full pl-5 pr-4 py-3 text-sm transition-all outline-none" required autocomplete="off">
+                    <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white rounded-full h-11 w-11 flex items-center justify-center transition-transform hover:scale-105 shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -112,6 +144,17 @@
         const captionText = document.getElementById('captionText');
         const loadingIndicator = document.getElementById('loadingIndicator');
         const noMorePosts = document.getElementById('noMorePosts');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        // Variabel Komentar Modal
+        const commentModal = document.getElementById('commentModal');
+        const closeCommentModal = document.getElementById('closeCommentModal');
+        const commentsList = document.getElementById('commentsList');
+        const commentForm = document.getElementById('commentForm');
+        const commentInput = document.getElementById('commentInput');
+        let currentActivePostId = null; 
+        let globalPostsData = {}; // Buat nyimpen data post sementara di memory
+        let currentParentId = null; // Tambahin ini buat nyimpen ID target balesan
 
         let selectedFileUrl = "";
         let currentOffset = 0;
@@ -130,16 +173,21 @@
 
         // --- FUNGSI RENDER UTAMA ---
         function renderPost(post) {
+            globalPostsData[post.id] = post; // Simpan di global variabel
+
             const article = document.createElement('article');
             article.className = 'card-hover overflow-hidden rounded-[32px] border border-slate-200 bg-white mb-6';
+            article.id = `post-${post.id}`;
             
             const userName = post.user?.name || 'User';
-            const filePath = `/storage/${post.image}`; 
+            const filePath = post.image ? `/storage/${post.image}` : null; 
             
-            // Cek Tipe File
             const isVideo = post.image?.match(/\.(mp4|webm|ogg|mov)$/i);
             const isPDF = post.image?.match(/\.(pdf)$/i);
             const isImage = post.image?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+
+            // Cek Status Like (Merah kalau is_liked true)
+            const likeColorClass = post.is_liked ? 'text-red-500' : 'text-slate-600 hover:text-red-500';
 
             article.innerHTML = `
                 <div class="flex items-center gap-3 p-5">
@@ -152,21 +200,14 @@
                 <div class="px-5 pb-4 text-sm text-slate-700 leading-relaxed">${post.content}</div>
                 
                 <div class="mx-5 mb-5 overflow-hidden rounded-2xl bg-slate-100 flex items-center justify-center">
-                    ${isImage ? `
-                        <img src="${filePath}" class="w-full h-auto object-cover max-h-[500px]" onerror="this.parentElement.innerHTML='<p class=&quot;p-4 text-xs text-slate-400&quot;>Gambar tidak dapat dimuat</p>'">
-                    ` : ''}
-
-                    ${isVideo ? `
-                        <video src="${filePath}" controls class="w-full h-auto max-h-[500px] bg-black"></video>
-                    ` : ''}
-
-                    ${isPDF ? `
+                    ${isImage && filePath ? `<img src="${filePath}" class="w-full h-auto object-cover max-h-[500px]">` : ''}
+                    ${isVideo && filePath ? `<video src="${filePath}" controls class="w-full h-auto max-h-[500px] bg-black"></video>` : ''}
+                    ${isPDF && filePath ? `
                         <div class="w-full flex items-center justify-between p-6 bg-violet-50 border border-violet-100 rounded-2xl">
                             <div class="flex items-center gap-4">
                                 <div class="h-12 w-12 flex items-center justify-center bg-white rounded-xl shadow-sm text-red-500 font-bold text-[10px]">PDF</div>
                                 <div class="overflow-hidden">
                                     <p class="text-sm font-bold text-slate-900 truncate max-w-[150px]">Dokumen Materi</p>
-                                    <p class="text-[10px] text-slate-500 italic">Klik untuk membaca</p>
                                 </div>
                             </div>
                             <a href="${filePath}" target="_blank" class="rounded-xl bg-violet-600 px-4 py-2 text-xs font-bold text-white hover:bg-violet-700 shadow-lg shadow-violet-100">Buka File</a>
@@ -174,15 +215,163 @@
                     ` : ''}
                 </div>
 
-                <div class="border-t border-slate-50 px-6 py-4 flex gap-6 text-sm font-bold text-slate-600">
-                    <button class="flex items-center gap-1.5 hover:text-red-500 transition-colors">❤️ ${post.likes_count || 0}</button>
-                    <button class="flex items-center gap-1.5 hover:text-violet-600 transition-colors">💬 ${post.comments_count || 0}</button>
+                <div class="border-t border-slate-50 px-6 py-4 flex gap-6 text-sm font-bold">
+                    <button onclick="handleLike(${post.id})" id="like-btn-${post.id}" class="flex items-center gap-1.5 transition-colors ${likeColorClass}">
+                        ❤️ <span id="like-count-${post.id}">${post.likes_count || 0}</span>
+                    </button>
+                    <button onclick="openCommentModal(${post.id})" class="flex items-center gap-1.5 text-slate-600 hover:text-violet-600 transition-colors">
+                        💬 <span id="comment-count-${post.id}">${post.comments_count || 0}</span>
+                    </button>
                 </div>
             `;
-            
             return article;
         }
 
+        // --- FUNGSI LIKE ---
+        async function handleLike(postId) {
+            const btnElement = document.getElementById(`like-btn-${postId}`);
+            const countElement = document.getElementById(`like-count-${postId}`);
+            
+            try {
+                const response = await fetch(`/posts/${postId}/like`, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+                });
+                const result = await response.json();
+                
+                let currentCount = parseInt(countElement.innerText);
+
+                if (result.status === 'liked') {
+                    btnElement.classList.remove('text-slate-600', 'hover:text-red-500');
+                    btnElement.classList.add('text-red-500');
+                    countElement.innerText = currentCount + 1;
+                    globalPostsData[postId].is_liked = true;
+                } else {
+                    btnElement.classList.remove('text-red-500');
+                    btnElement.classList.add('text-slate-600', 'hover:text-red-500');
+                    countElement.innerText = currentCount - 1;
+                    globalPostsData[postId].is_liked = false;
+                }
+            } catch (error) {
+                console.error("Gagal melakukan like:", error);
+            }
+        }
+
+        // --- FUNGSI KOMENTAR FLOATING MODAL ---
+        function openCommentModal(postId) {
+            currentActivePostId = postId;
+            const post = globalPostsData[postId];
+            
+            commentsList.innerHTML = ''; // Bersihin isi modal lama
+            
+            if (!post.comments || post.comments.length === 0) {
+                commentsList.innerHTML = `<p class="text-center text-sm text-slate-400 mt-10">Belum ada komentar. Jadilah yang pertama!</p>`;
+            } else {
+                // LOGIKA BARU: Pisahin mana Komentar Utama, mana Balasan
+                const parentComments = post.comments.filter(c => !c.parent_id || c.parent_id == 0 || c.parent_id == "null");
+                const childComments = post.comments.filter(c => c.parent_id && c.parent_id != 0);
+
+                // Render Bapaknya dulu, baru Anak-anaknya yang ngikutin bapaknya
+                parentComments.forEach(parent => {
+                    appendCommentToUI(parent, false); // Ini Bapak
+                    
+                    // Pake == (dua sama dengan) biar string "1" dan angka 1 dianggap sama
+                    childComments.filter(child => child.parent_id == parent.id).forEach(child => {
+                        appendCommentToUI(child, true);
+                    });
+                });
+            }
+            commentModal.classList.remove('hidden');
+        }
+
+        closeCommentModal.addEventListener('click', () => {
+            commentModal.classList.add('hidden');
+            currentActivePostId = null;
+        });
+
+        function appendCommentToUI(comment, isReply = false) {
+            console.log(`DEBUG -> User: ${comment.user?.name}, ID: ${comment.id}, Parent: ${comment.parent_id}, IsReply: ${isReply}`);
+            const userName = comment.user?.name || 'User';
+            const noDataHtml = commentsList.querySelector('p.text-slate-400');
+            if (noDataHtml) noDataHtml.remove();
+
+            const commentDiv = document.createElement('div');
+            // Kalau isReply = true, kasih margin kiri biar menjorok
+            commentDiv.className = `flex gap-3 ${isReply ? 'ml-10 mt-2' : 'mt-5'}`;
+    
+            commentDiv.innerHTML = `
+                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=e2e8f0&color=475569" class="h-8 w-8 rounded-full shrink-0">
+                <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm flex-1">
+                    <div class="flex justify-between items-center mb-0.5">
+                        <p class="text-[11px] font-bold text-slate-500">${userName}</p>
+                        ${!isReply ? `<button onclick="setReply(${comment.id}, '${userName}')" class="text-[10px] text-violet-500 hover:underline">Balas</button>` : ''}
+                    </div>
+                    <p class="text-sm text-slate-800">${comment.body}</p>
+                </div>
+            `;
+            commentsList.appendChild(commentDiv);
+            commentsList.scrollTop = commentsList.scrollHeight; 
+        }
+
+        // Tambahin dua fungsi ini tepat di bawahnya
+        function setReply(commentId, name) {
+            currentParentId = commentId;
+            document.getElementById('replyTargetName').innerText = name;
+            document.getElementById('replyInfo').classList.remove('hidden');
+            document.getElementById('commentInput').focus();
+        }
+
+        function cancelReply() {
+            currentParentId = null;
+            document.getElementById('replyInfo').classList.add('hidden');
+        }
+
+        // Submit Form Komentar
+        commentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = commentInput.value.trim();
+            if (!text || !currentActivePostId) return;
+
+            const submitBtn = commentForm.querySelector('button');
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch(`/posts/${currentActivePostId}/comment`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken, 
+                        'Accept': 'application/json' 
+                    },
+                    body: JSON.stringify({ 
+                        body: text,
+                        parent_id: currentParentId // Kirim target balesannya ke backend
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update Memory Data
+                    globalPostsData[currentActivePostId].comments.push(result.data);
+                    
+                    // JURUS RENDER ULANG MODAL (Biar urutannya otomatis bener)
+                    openCommentModal(currentActivePostId); 
+                    
+                    commentInput.value = '';
+                    cancelReply(); 
+                    
+                    const countSpan = document.getElementById(`comment-count-${currentActivePostId}`);
+                    countSpan.innerText = parseInt(countSpan.innerText) + 1;
+                }
+            } catch (error) {
+                alert("Gagal mengirim komentar!");
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+
+        // --- FETCH POSTS ---
         async function fetchPosts(offset, limit) {
             if (isLoading) return;
             isLoading = true;
@@ -224,7 +413,7 @@
         // Initial Load
         fetchPosts(0, 5);
 
-        // Upload Preview
+        // Upload Preview logic ... (Tetap Sama)
         uploadBtn.addEventListener('click', () => fileInput.click());
 
         fileInput.addEventListener('change', function() {
@@ -251,7 +440,6 @@
             }
         });
 
-        // Submit Form
         submitUpload.addEventListener('click', async () => {
             const caption = captionText.value.trim();
             const file = fileInput.files[0];
@@ -269,7 +457,7 @@
                 const response = await fetch('/posts', {
                     method: 'POST',
                     body: formData,
-                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '' }
+                    headers: { 'X-CSRF-TOKEN': csrfToken }
                 });
 
                 const result = await response.json();
