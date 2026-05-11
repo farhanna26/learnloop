@@ -2,45 +2,86 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Http\Controllers\ChatController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\PostController;
 
-Route::get('/profile', function () {
-    $user = User::first();
-    return view('profile', compact('user'));
-});
+// --- ZONA BEBAS ---
+Route::get('/', function () {
+    return view('landing');
+})->name('landing');
 
-Route::get('/addprofile', function () {
-    $user = User::first();
-    return view('addprofile', compact('user'));
-});
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login');
 
-Route::post('/addprofile', function (Request $request) {
-    $user = User::first();
+Route::get('/register', function () {
+    return view('auth.register');
+})->name('register');
 
-    if (! $user) {
-        abort(404, 'User not found.');
-    }
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
 
-    $validated = $request->validate([
-        'description' => 'nullable|string|max:500',
-        'photo' => 'nullable|image|max:2048',
-    ]);
+// --- ZONA SATPAM (Wajib Login) ---
+Route::middleware('auth')->group(function () {
+    
+    // 1. Rute Beranda & Kontak
+    Route::get('/beranda', function() {
+        return view('beranda');
+    })->name('beranda');
+    
+    Route::get('/contacts', [ChatController::class, 'contactList']);
+    Route::get('/search', [UserController::class, 'search']);
 
-    if ($request->hasFile('photo')) {
-        $photo = $request->file('photo');
-        $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9_\-\.]/', '_', $photo->getClientOriginalName());
-        $destination = public_path('profile-photos');
+    // 2. === RUTE POSTINGAN & SOSMED ===
+    Route::get('/posts/fetch', [PostController::class, 'index']);
+    Route::post('/posts', [PostController::class, 'store']);
+    Route::post('/posts/{id}/comment', [PostController::class, 'storeComment']);
+    Route::post('/posts/{id}/like', [PostController::class, 'toggleLike']);
 
-        if (! is_dir($destination)) {
-            mkdir($destination, 0755, true);
+    // 3. === RUTE CHAT ===
+    Route::get('/chat/private/{targetUserId}', [ChatController::class, 'createOrFindPrivateChat']);
+    Route::get('/chat/{roomId}', [ChatController::class, 'index']);
+    Route::post('/chat/send', [ChatController::class, 'store']);
+
+    // 4. === RUTE PROFIL (Punya Aya) ===
+    Route::get('/profile', function () {
+        $user = Auth::user(); // Gue ganti jadi Auth::user biar yang muncul profil user yg login
+        return view('profile', compact('user'));
+    });
+
+    Route::get('/addprofile', function () {
+        $user = Auth::user();
+        return view('addprofile', compact('user'));
+    });
+
+    Route::post('/addprofile', function (Request $request) {
+        $user = Auth::user();
+        
+        $validated = $request->validate([
+            'description' => 'nullable|string|max:500',
+            'photo' => 'nullable|image|max:2048',
+        ]);
+
+        if ($request->hasFile('photo')) {
+            $photo = $request->file('photo');
+            $filename = time() . '_' . $photo->getClientOriginalName();
+            $destination = public_path('profile-photos');
+            
+            if (!is_dir($destination)) {
+                mkdir($destination, 0755, true);
+            }
+            
+            $photo->move($destination, $filename);
+            $user->photo = 'profile-photos/' . $filename;
         }
 
-        $photo->move($destination, $filename);
-        $user->photo = 'profile-photos/' . $filename;
-    }
+        $user->description = $validated['description'] ?? $user->description;
+        $user->save();
 
-    $user->description = $validated['description'] ?? $user->description;
-    $user->save();
-
-    return redirect('/profile')->with('success', 'Profil berhasil disimpan.');
+        return redirect('/profile')->with('success', 'Profil berhasil disimpan.');
+    });
 });
