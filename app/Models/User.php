@@ -10,7 +10,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password'])]
+// KITA GABUNGIN: Fillable standar lu + data profil buatan Aya
+#[Fillable(['name', 'email', 'password', 'description', 'photo', 'location', 'linkedin', 'gmail'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -30,6 +31,7 @@ class User extends Authenticatable
         ];
     }
 
+    // KITA TETEP PAKE: Sistem Follow biar fitur sosmed jalan
     // Narik data siapa aja yang KITA follow (Following)
     public function followings()
     {
@@ -40,7 +42,7 @@ class User extends Authenticatable
     // Narik data siapa aja yang nge-follow KITA (Followers)
     public function followers()
     {
-        return $this->belongsToMany(User::class, 'follows', 'followed_id', 'follower_id')
+        return $this->belongsToMany(User::class, 'followed_id', 'follower_id')
                     ->withTimestamps();
     }
 
