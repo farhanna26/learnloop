@@ -23,7 +23,16 @@
         </div>
 
         <form action="/addprofile" method="POST" enctype="multipart/form-data" class="p-8 space-y-8">
-            @csrf
+                @if ($errors->any())
+            <div class="mb-6 rounded-2xl bg-red-50 p-4 border border-red-100">
+                <ul class="text-sm font-bold text-red-500 space-y-1">
+                    @foreach ($errors->all() as $error)
+                        <li>🚨 {{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif    
+        @csrf
             
             <div class="space-y-3">
                 <label class="text-sm font-bold text-slate-700 ml-1">Banner Profil (Header)</label>

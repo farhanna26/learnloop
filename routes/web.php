@@ -63,7 +63,7 @@ Route::middleware('auth')->group(function () {
     
     $validated = $request->validate([
         'description' => 'nullable|string|max:500',
-        'photo' => 'nullable|image|max:2048',
+        'photo' => 'nullable|image|max:3072',
         'banner' => 'nullable|image|max:3072', // Banner biasanya lebih gede sizenya
     ]);
 

@@ -195,6 +195,11 @@
         
         const userName = post.user?.name || 'User';
         const filePath = post.image ? `/storage/${post.image}` : null; 
+
+        // --- TAMBAHAN BARU: Cek foto profil si pembuat post ---
+        const userPhoto = post.user?.photo 
+            ? `/${post.user.photo}` 
+            : `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=7c3aed&color=ffffff&rounded=true`;
         
         const isVideo = post.image?.match(/\.(mp4|webm|ogg|mov)$/i);
         const isPDF = post.image?.match(/\.(pdf)$/i);
@@ -204,7 +209,7 @@
 
         article.innerHTML = `
             <div class="flex items-center gap-3 p-5">
-                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=7c3aed&color=ffffff&rounded=true" class="h-11 w-11 rounded-full ring-2 ring-violet-50" />
+                <img src="${userPhoto}" class="h-11 w-11 rounded-full ring-2 ring-violet-50" />
                 <div>
                     <p class="text-sm font-bold text-slate-900">${userName}</p>
                     <p class="text-[11px] text-slate-400 uppercase font-medium">${formatTimeAgo(post.created_at)}</p>
@@ -348,8 +353,14 @@
         });
 
         function appendCommentToUI(comment, isReply = false) {
-            console.log(`DEBUG -> User: ${comment.user?.name}, ID: ${comment.id}, Parent: ${comment.parent_id}, IsReply: ${isReply}`);
+            console.log("CEK DATA KOMENTAR:", comment);
             const userName = comment.user?.name || 'User';
+
+           // --- TAMBAHAN BARU: Cek foto profil si pengomen ---
+            const commenterPhoto = comment.user?.photo 
+                ? `${window.location.origin}/${comment.user.photo}` 
+                : `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=e2e8f0&color=475569`;
+
             const noDataHtml = commentsList.querySelector('p.text-slate-400');
             if (noDataHtml) noDataHtml.remove();
 
@@ -358,7 +369,7 @@
             commentDiv.className = `flex gap-3 ${isReply ? 'ml-10 mt-2' : 'mt-5'}`;
     
             commentDiv.innerHTML = `
-                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=e2e8f0&color=475569" class="h-8 w-8 rounded-full shrink-0">
+                <img src="${commenterPhoto}" class="h-8 w-8 rounded-full shrink-0">
                 <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm flex-1">
                     <div class="flex justify-between items-center mb-0.5">
                         <p class="text-[11px] font-bold text-slate-500">${userName}</p>
