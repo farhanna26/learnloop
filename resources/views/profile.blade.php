@@ -29,8 +29,8 @@
             </div>
             <div class="flex items-center gap-3">
                 <a href="/profile" class="transition-transform hover:scale-110 active:scale-95">
-                    <img src="{{ $user->photo ? asset($user->photo) : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=8b5cf6&color=ffffff&rounded=true' }}" 
-                         class="h-9 w-9 rounded-xl object-cover shadow-sm border border-violet-100" />
+                    <img src="{{ Auth::user()->photo ? asset(Auth::user()->photo) : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name ?? 'User').'&background=8b5cf6&color=ffffff&rounded=true' }}" 
+                        class="h-9 w-9 rounded-xl object-cover shadow-sm border border-violet-100" />
                 </a>
             </div>
         </div>
@@ -52,6 +52,29 @@
                                 Pesan
                             </div>
                         </a>
+                        <a href="/search" class="group flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">
+                            <div class="flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                                Search
+                            </div>
+                        </a>
+                        <a href="/notifications" class="group flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900 {{ request()->is('notifications') ? 'bg-violet-50 text-violet-700 font-bold' : '' }}">
+                            <div class="flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                Notifikasi
+                            </div>
+                            
+                            @php $unreadCount = auth()->user()->notifications()->where('is_read', false)->count(); @endphp
+                            @if($unreadCount > 0)
+                                <span class="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
+                                    {{ $unreadCount }}
+                                </span>
+                            @endif
+                        </a>
                         <a href="/profile" class="group flex items-center gap-3 rounded-2xl bg-violet-50 px-4 py-3 text-sm font-bold text-violet-700 transition-all">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -70,7 +93,8 @@
                     </div>
                 @endif
 
-                <div class="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-sm">
+                <div class="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-sm mb-8">
+                    
                     <div class="h-40 w-full bg-slate-200 overflow-hidden">
                         @if($user->banner)
                             <img src="{{ asset($user->banner) }}" class="w-full h-full object-cover">
@@ -80,23 +104,55 @@
                     </div>
                     
                     <div class="px-6 flex justify-between items-start -mt-16 relative">
+                        
                         <div class="rounded-full p-1.5 bg-white">
                             <img src="{{ $user->photo ? asset($user->photo) : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=8b5cf6&color=ffffff&rounded=true' }}" 
                                  class="h-28 w-28 rounded-full object-cover shadow-md border-4 border-white bg-white" />
                         </div>
-                        <div class="mt-20">
-                            <a href="/addprofile" class="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-50">
-                                Edit Profil
-                            </a>
+                        
+                        <div class="mt-20 flex items-center gap-3">
+                            @if(Auth::id() == $user->id)
+                                <a href="/profile/edit" class="rounded-full border border-slate-300 px-5 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-50">
+                                    Edit Profil
+                                </a>
+                            @else
+                                <button id="follow-btn" onclick="handleFollow({{ $user->id }})" class="rounded-full px-5 py-2 text-sm font-bold shadow-lg transition active:scale-95 flex items-center gap-2 {{ $isFollowing ? 'bg-slate-200 text-slate-800 shadow-slate-200 hover:bg-red-100 hover:text-red-600' : 'bg-violet-600 text-white shadow-violet-200 hover:bg-violet-700' }}">
+                                    <svg id="follow-icon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 {{ $isFollowing ? 'hidden' : '' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                    </svg>
+                                    <span id="follow-text">{{ $isFollowing ? 'Following' : 'Follow' }}</span>
+                                </button>
+
+                                <a href="/chat/private/{{ $user->id }}" id="chat-btn" class="rounded-full h-9 w-9 flex items-center justify-center bg-white text-slate-600 hover:bg-violet-100 hover:text-violet-600 transition-colors shadow-sm border border-slate-200 {{ $isFollowing ? '' : 'hidden' }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                    </svg>
+                                </a>
+                            @endif
                         </div>
                     </div>
 
-                    <div class="px-6 mt-3 pb-6">
+                    <div class="px-6 mt-3 pb-8">
                         <h1 class="text-2xl font-extrabold text-slate-900">{{ $user->name }}</h1>
                         <p class="text-sm font-medium text-slate-500">{{ $user->email }}</p>
                         
                         <div class="mt-4 text-sm text-slate-800 leading-relaxed">
                             {{ $user->description ?? 'Belum ada deskripsi profil. Klik Edit Profil untuk menambahkan.' }}
+                        </div>
+
+                        <div class="mt-5 flex gap-6 text-sm">
+                            <div class="flex gap-1.5 items-center">
+                                <span class="font-extrabold text-slate-900">{{ $user->followings_count ?? 0 }}</span>
+                                <span class="font-medium text-slate-500">Mengikuti</span>
+                            </div>
+                            <div class="flex gap-1.5 items-center">
+                                <span class="font-extrabold text-slate-900" id="follower-count">{{ $user->followers_count ?? 0 }}</span>
+                                <span class="font-medium text-slate-500">Pengikut</span>
+                            </div>
+                            <div class="flex gap-1.5 items-center">
+                                <span class="font-extrabold text-slate-900">{{ $user->posts_count ?? 0 }}</span>
+                                <span class="font-medium text-slate-500">Postingan</span>
+                            </div>
                         </div>
 
                         <div class="mt-4 flex flex-wrap gap-4 text-sm text-slate-500">
@@ -110,9 +166,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="flex border-t border-slate-200">
-                    </div>
                 </div>
 
                 <div id="postsWrapper" class="space-y-6">
@@ -120,6 +173,7 @@
                         <p class="text-slate-500 font-medium">Postingan lu bakal muncul di sini.</p>
                     </div>
                 </div>
+
             </section>
 
             <aside class="hidden lg:col-span-3 lg:block">
@@ -439,6 +493,54 @@
                 submitBtn.disabled = false;
             }
         });
+
+        // === FUNGSI AJAX BUAT FOLLOW/UNFOLLOW ===
+        async function handleFollow(targetId) {
+            const followBtn = document.getElementById('follow-btn');
+            const followText = document.getElementById('follow-text');
+            const followIcon = document.getElementById('follow-icon');
+            const followerCountSpan = document.getElementById('follower-count'); // Yang tadi kita kasih ID
+            const chatBtn = document.getElementById('chat-btn'); // Tangkap tombol chatnya
+            
+            // Disable tombol sementara biar gak dispam klik
+            followBtn.disabled = true;
+
+            try {
+                const response = await fetch(`/profile/${targetId}/follow`, {
+                    method: 'POST',
+                    headers: { 
+                        'X-CSRF-TOKEN': csrfToken, 
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    let currentFollowers = parseInt(followerCountSpan.innerText);
+
+                    if (result.is_following) {
+                        // Kalau berhasil Follow: Ganti abu-abu
+                        followBtn.className = "rounded-full px-5 py-2 text-sm font-bold shadow-lg transition active:scale-95 flex items-center gap-2 bg-slate-200 text-slate-800 shadow-slate-200 hover:bg-red-100 hover:text-red-600";
+                        followText.innerText = "Following";
+                        followIcon.classList.add('hidden');
+                        followerCountSpan.innerText = currentFollowers + 1; // Angka nambah 1
+                        if(chatBtn) chatBtn.classList.remove('hidden');
+                    } else {
+                        // Kalau di-Unfollow: Balik ungu
+                        followBtn.className = "rounded-full px-5 py-2 text-sm font-bold shadow-lg transition active:scale-95 flex items-center gap-2 bg-violet-600 text-white shadow-violet-200 hover:bg-violet-700";
+                        followText.innerText = "Follow";
+                        followIcon.classList.remove('hidden');
+                        followerCountSpan.innerText = currentFollowers - 1; // Angka kurang 1
+                        if(chatBtn) chatBtn.classList.add('hidden');
+                    }
+                }
+            } catch (error) {
+                console.error("Gagal melakukan follow:", error);
+            } finally {
+                followBtn.disabled = false;
+            }
+        }
 </script>
 </body>
 </html>

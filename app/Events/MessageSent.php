@@ -18,12 +18,14 @@ class MessageSent implements \Illuminate\Contracts\Broadcasting\ShouldBroadcastN
     public $username;
     public $message;
     public $roomId;
+    public $photo;
 
     public function __construct($username, $message, $roomId)
     {
         $this->username = $username;
-        $this->message = $message;
-        $this->roomId = $roomId;
+        $this->message  = $message;
+        $this->roomId   = $roomId;
+        $this->photo    = \App\Models\User::where('name', $username)->value('photo');
     }
 
     public function broadcastOn(): array
@@ -36,5 +38,15 @@ class MessageSent implements \Illuminate\Contracts\Broadcasting\ShouldBroadcastN
     public function broadcastAs(): string
     {
         return 'message.sent'; // Label surat lu
+    }
+
+    public function broadcastWith() 
+    {
+        return [
+            'message'  => $this->message,
+            'username' => $this->username,
+            'room_id'  => $this->roomId,
+            'photo'    => $this->photo ? asset($this->photo) : null,
+        ];
     }
 }
