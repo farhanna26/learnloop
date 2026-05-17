@@ -47,41 +47,31 @@ Route::middleware('auth')->group(function () {
     Route::get('/chat/{roomId}', [ChatController::class, 'index']);
     Route::post('/chat/send', [ChatController::class, 'store']);
 
-    // 4. === RUTE PROFIL (Punya Aya) ===
-    Route::get('/profile', function () {
-        $user = Auth::user(); // Gue ganti jadi Auth::user biar yang muncul profil user yg login
-        return view('profile', compact('user'));
-    });
-
-    Route::get('/addprofile', function () {
+    // 4. === RUTE PROFIL ===
+    
+    // Rute buat nampilin form edit profil 
+    Route::get('/profile/edit', function () {
         $user = Auth::user();
         return view('addprofile', compact('user'));
-    });
+    })->name('profile.edit');
 
-    Route::post('/addprofile', function (Request $request) {
-        $user = Auth::user();
-        
-        $validated = $request->validate([
-            'description' => 'nullable|string|max:500',
-            'photo' => 'nullable|image|max:2048',
-        ]);
+    // Rute buat nyimpen data edit profil (Ngambil dari UserController)
+    Route::post('/profile/edit', [UserController::class, 'updateProfile'])->name('profile.update');
 
-        if ($request->hasFile('photo')) {
-            $photo = $request->file('photo');
-            $filename = time() . '_' . $photo->getClientOriginalName();
-            $destination = public_path('profile-photos');
-            
-            if (!is_dir($destination)) {
-                mkdir($destination, 0755, true);
-            }
-            
-            $photo->move($destination, $filename);
-            $user->photo = 'profile-photos/' . $filename;
-        }
+    // Rute profil diri sendiri (Nggak pake ID)
+    Route::get('/profile', function () {
+        // Pake withCount juga di sini biar angkanya kebawa!
+        $user = User::withCount(['followers', 'followings', 'posts'])->find(Auth::id());
+        return view('profile', compact('user'));
+    })->name('profile.me');
 
-        $user->description = $validated['description'] ?? $user->description;
-        $user->save();
+    // Rute profil orang lain (Pake ID)
+    Route::get('/profile/{id}', [UserController::class, 'showProfile'])->name('profile.show');
 
-        return redirect('/profile')->with('success', 'Profil berhasil disimpan.');
-    });
+    // --- TAMBAHIN RUTE INI BUAT TOMBOL FOLLOW ---
+    Route::post('/profile/{id}/follow', [UserController::class, 'toggleFollow']);
+
+    // Rute Notifikasi
+    Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    
 });

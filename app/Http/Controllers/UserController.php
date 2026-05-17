@@ -7,6 +7,7 @@ use App\Models\User;
 
 class UserController extends Controller
 {
+    // === FUNGSI PENCARIAN TEMAN ===
     public function search(Request $request)
     {
         $keyword = $request->input('q');
@@ -25,5 +26,83 @@ class UserController extends Controller
 
         // Kalau ngebuka dari URL biasa, balikin piringan HTML
         return view('search', compact('users', 'keyword'));
+    }
+
+    // === FUNGSI LIHAT PROFIL (ORANG LAIN ATAU SENDIRI) ===
+    public function showProfile($id)
+    {
+        // PAKE WITHCOUNT: Biar dia ngitungin jumlah followers, followings, dan posts sekaligus
+        $user = User::withCount(['followers', 'followings', 'posts'])->findOrFail($id);
+
+        // Cek apakah user yang login lagi nge-follow user yang profilnya dibuka
+        $isFollowing = auth()->check() ? auth()->user()->isFollowing($user) : false;
+        
+        // Kirim variabel isFollowing ke tampilan
+        return view('profile', compact('user', 'isFollowing'));
+    }
+
+    // === FUNGSI EKSEKUSI TOMBOL FOLLOW ===
+    public function toggleFollow($id)
+    {
+        $user = auth()->user();
+        $targetUser = User::findOrFail($id);
+
+        if ($user->id === $targetUser->id) {
+            return response()->json(['success' => false, 'message' => 'Gak bisa follow diri sendiri!']);
+        }
+
+        if ($user->isFollowing($targetUser)) {
+            $user->followings()->detach($targetUser->id);
+            $isFollowing = false;
+            
+            // (Opsional) Lu bisa hapus notifnya kalau dia unfollow, tapi biasanya dibiarin aja
+        } else {
+            $user->followings()->attach($targetUser->id);
+            $isFollowing = true;
+
+            // --- INI LOGIKA NOTIFIKASINYA ---
+            \App\Models\Notification::create([
+                'user_id' => $targetUser->id, // Target (Miss Zaychik)
+                'sender_id' => $user->id,      // Pelaku (Farhan)
+                'type' => 'follow',            // Jenisnya
+                'is_read' => false
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'is_following' => $isFollowing
+        ]);
+    }
+
+    // === FUNGSI SIMPAN EDIT PROFIL (FOTO & BANNER) ===
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+        
+        $validated = $request->validate([
+            'description' => 'nullable|string|max:500',
+            'photo' => 'nullable|image|max:3072',
+            'banner' => 'nullable|image|max:3072', 
+        ]);
+
+        if ($request->hasFile('photo')) {
+            $photo = $request->file('photo');
+            $filename = 'photo_' . time() . '.' . $photo->getClientOriginalExtension();
+            $photo->move(public_path('profile-photos'), $filename);
+            $user->photo = 'profile-photos/' . $filename;
+        }
+
+        if ($request->hasFile('banner')) {
+            $banner = $request->file('banner');
+            $filename = 'banner_' . time() . '.' . $banner->getClientOriginalExtension();
+            $banner->move(public_path('profile-banners'), $filename); 
+            $user->banner = 'profile-banners/' . $filename;
+        }
+
+        $user->description = $validated['description'];
+        $user->save();
+
+        return redirect('/profile')->with('success', 'Berhasil Edit Profile');
     }
 }

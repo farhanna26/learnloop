@@ -12,7 +12,6 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
         .glass-effect { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-        /* Kustomisasi scrollbar biar estetik */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -28,33 +27,39 @@
                 <a href="/contacts" class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 border border-slate-200 text-slate-500 hover:text-violet-600 hover:bg-violet-50 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
                 </a>
-                <div>
-                    <h2 class="text-lg font-bold text-slate-900">{{ $chatTitle }}</h2>
-                    <p class="text-xs text-slate-500 font-medium flex items-center gap-1">
-                        <span class="w-2 h-2 rounded-full bg-green-500 block"></span> Online
-                    </p>
+                
+                <div class="flex items-center gap-3">
+                    <img src="{{ $otherUser && $otherUser->photo ? asset($otherUser->photo) : 'https://ui-avatars.com/api/?name='.urlencode($chatTitle).'&background=8b5cf6&color=ffffff&rounded=true' }}" 
+                            class="h-10 w-10 rounded-full border border-slate-100 shadow-sm object-cover" alt="Profile">
+                    <div>
+                        <h2 class="text-sm font-extrabold text-slate-900 leading-tight">{{ $chatTitle }}</h2>
+                        <p class="text-[10px] text-slate-400 font-bold flex items-center gap-1 uppercase tracking-wider">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 block"></span> Online
+                        </p>
+                    </div>
                 </div>
             </div>
             
-            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
             </div>
         </header>
 
-        <div id="chat-box" class="flex-1 overflow-y-auto p-6 space-y-4 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-slate-50">
+        <div id="chat-box" class="flex-1 overflow-y-auto p-6 space-y-6 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-slate-50 custom-scrollbar">
             @foreach($messages as $msg)
                 @if($msg->username === Auth::user()->name)
-                    <div class="flex justify-end">
-                        <div class="max-w-[75%] bg-violet-600 text-white px-4 py-2.5 rounded-2xl rounded-tr-sm shadow-sm">
+                    <div class="flex justify-end animate-fade-in lowercase">
+                        <div class="max-w-[75%] bg-violet-600 text-white px-4 py-3 rounded-2xl rounded-tr-sm shadow-sm shadow-violet-100">
                             <p class="text-sm leading-relaxed">{{ $msg->text }}</p>
                         </div>
                     </div>
                 @else
-                    <div class="flex items-end gap-2.5">
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode($msg->username) }}&background=e2e8f0&color=475569&bold=true" alt="{{ $msg->username }}" class="w-8 h-8 rounded-full mb-1 border border-slate-200">
+                    <div class="flex items-end gap-3 animate-fade-in lowercase">
+                        <img src="{{ $msg->user && $msg->user->photo ? asset($msg->user->photo) : 'https://ui-avatars.com/api/?name='.urlencode($msg->username).'&background=f1f5f9&color=64748b&bold=true' }}" 
+                            alt="{{ $msg->username }}" class="w-8 h-8 rounded-full border border-slate-200 mb-1 object-cover">
                         <div class="max-w-[75%]">
-                            <span class="text-[10px] text-slate-500 font-bold ml-1 mb-1 block">{{ $msg->username }}</span>
-                            <div class="bg-white text-slate-800 px-4 py-2.5 rounded-2xl rounded-tl-sm shadow-sm border border-slate-100">
+                            <span class="text-[10px] text-slate-400 font-bold ml-1 mb-1 block tracking-wide capitalize">{{ $msg->username }}</span>
+                            <div class="bg-white text-slate-800 px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm border border-slate-100">
                                 <p class="text-sm leading-relaxed">{{ $msg->text }}</p>
                             </div>
                         </div>
@@ -63,14 +68,16 @@
             @endforeach
         </div>
 
-        <div class="bg-white border-t border-slate-200 p-4 shrink-0">
+        <div class="bg-white border-t border-slate-100 p-4 shrink-0">
             <form id="chat-form" class="flex items-center gap-3">
                 <div class="relative flex-1">
-                    <input type="text" id="message-text" placeholder="Ketik pesan..." class="w-full bg-slate-100 border-transparent focus:bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 rounded-full pl-5 pr-4 py-3 text-sm transition-all outline-none" required autocomplete="off">
+                    <input type="text" id="message-text" placeholder="Ketik pesan..." class="w-full bg-slate-100 border-transparent focus:bg-white focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 rounded-2xl pl-5 pr-4 py-3.5 text-sm transition-all outline-none" required autocomplete="off">
                 </div>
                 
-                <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white rounded-full h-11 w-11 flex items-center justify-center transition-transform hover:scale-105 shadow-md shadow-violet-200 shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white rounded-2xl h-12 w-12 flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-lg shadow-violet-200 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
                 </button>
             </form>
         </div>
@@ -83,35 +90,31 @@
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         const roomId = {{ $room->id }};
-        const myName = "{{ Auth::user()->name }}"; // Ambil nama kita buat ngecek Kanan/Kiri
+        const myName = "{{ Auth::user()->name }}";
 
-        // Auto-scroll pas awal load
         chatBox.scrollTop = chatBox.scrollHeight;
 
         window.Echo.private(`chat.room.${roomId}`)
             .listen('.message.sent', (e) => {
                 const newChat = document.createElement('div');
                 const isMe = e.username === myName;
+                const avatarUrl = e.photo 
+                    ? e.photo 
+                    : `https://ui-avatars.com/api/?name=${encodeURIComponent(e.username)}&background=f1f5f9&color=64748b&bold=true`;
 
-                // Logika nampilin Kanan (Kita) atau Kiri (Orang Lain)
                 if (isMe) {
                     newChat.className = 'flex justify-end mt-4 mb-4';
-                    newChat.innerHTML = `
-                        <div class="max-w-[75%] bg-violet-600 text-white px-4 py-2.5 rounded-2xl rounded-tr-sm shadow-sm">
-                            <p class="text-sm leading-relaxed">${e.message}</p>
-                        </div>
-                    `;
+                    newChat.innerHTML = `<div class="max-w-[75%] bg-violet-600 text-white px-4 py-3 rounded-2xl rounded-tr-sm shadow-sm"><p class="text-sm leading-relaxed">${e.message}</p></div>`;
                 } else {
-                    newChat.className = 'flex items-end gap-2.5 mt-4 mb-4';
+                    newChat.className = 'flex items-end gap-3 mt-4 mb-4';
                     newChat.innerHTML = `
-                        <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(e.username)}&background=e2e8f0&color=475569&bold=true" class="w-8 h-8 rounded-full mb-1 border border-slate-200">
+                        <img src="${avatarUrl}" class="w-8 h-8 rounded-full border border-slate-200 mb-1 object-cover">
                         <div class="max-w-[75%]">
-                            <span class="text-[10px] text-slate-500 font-bold ml-1 mb-1 block">${e.username}</span>
-                            <div class="bg-white text-slate-800 px-4 py-2.5 rounded-2xl rounded-tl-sm shadow-sm border border-slate-100">
+                            <span class="text-[10px] text-slate-400 font-bold ml-1 mb-1 block tracking-wide capitalize">${e.username}</span>
+                            <div class="bg-white text-slate-800 px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm border border-slate-100">
                                 <p class="text-sm leading-relaxed">${e.message}</p>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 }
                 
                 chatBox.appendChild(newChat);

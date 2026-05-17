@@ -14,26 +14,25 @@ class ChatController extends Controller
     // 1. Nampilin Isi Chat di Room Tertentu (UDAH DI-UPDATE NAMA HEADER-NYA)
     public function index($roomId) 
     {
-        // Panggil room sekalian sama data user di dalemnya biar bisa dicari namanya
         $room = Room::with('users')->findOrFail($roomId);
 
         $messages = Message::with('user')
                         ->where('room_id', $roomId)
                         ->get(); 
 
-        // LOGIKA PENENTUAN NAMA HEADER CHAT
+        // LOGIKA PENENTUAN NAMA & DATA PARTNER
         $chatTitle = 'Ruang Obrolan';
+        $otherUser = null; // Tambahin ini
+
         if ($room->type === 'private') {
-            // Kalau private, cari nama user yang ID-nya BUKAN ID lu
             $otherUser = $room->users->where('id', '!=', auth()->id())->first();
             $chatTitle = $otherUser ? $otherUser->name : 'User Tidak Diketahui';
         } else {
-            // Kalau grup, tampilin nama grupnya
             $chatTitle = $room->name ?? 'Grup Tanpa Nama';
         }
 
-        // Kirim variabel $chatTitle ke Blade
-        return view('chat', compact('messages', 'room', 'chatTitle'));
+        // Kita kirim $otherUser juga ke compact
+        return view('chat', compact('messages', 'room', 'chatTitle', 'otherUser'));
     }
 
     // 2. Fungsi Kirim Pesan

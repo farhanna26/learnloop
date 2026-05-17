@@ -18,7 +18,7 @@ class Message extends Model
     // 2. Relasi ke User
     public function user()
     {
-        return $this->belongsTo(User::class, 'username');
+        return $this->belongsTo(User::class, 'username', 'name');
     }
 
     // 3. Relasi ke Room

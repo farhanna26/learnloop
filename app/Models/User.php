@@ -42,7 +42,8 @@ class User extends Authenticatable
     // Narik data siapa aja yang nge-follow KITA (Followers)
     public function followers()
     {
-        return $this->belongsToMany(User::class, 'followed_id', 'follower_id')
+        // UDAH GUE FIX: Tambahin 'follows' sebagai nama tabelnya
+        return $this->belongsToMany(User::class, 'follows', 'followed_id', 'follower_id')
                     ->withTimestamps();
     }
 
@@ -50,5 +51,27 @@ class User extends Authenticatable
     public function isFollowing(User $user)
     {
         return $this->followings()->where('followed_id', $user->id)->exists();
+    }
+
+    // TAMBAHAN BARU: Relasi ke tabel posts biar bisa ngitung jumlah postingan
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
+    }
+
+    // TAMBAHAN: Relasi ke Notifikasi
+    // Satu user bisa punya banyak notifikasi
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
+
+    // TAMBAHAN: Helper untuk hitung notif belum dibaca
+    public function unreadNotificationsCount()
+    {
+        // Hitung berapa notif yang is_read nya masih false
+        return $this->hasMany(Notification::class)
+                    ->where('is_read', false)
+                    ->count();
     }
 }

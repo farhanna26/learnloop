@@ -10,21 +10,29 @@ use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
-    // Mengambil semua postingan (Feed) dengan Paginasi + Status Like
     public function index(Request $request)
     {
         $offset = $request->query('offset', 0);
         $limit = $request->query('limit', 5);
-        $userId = auth()->id();
+        $loginUserId = auth()->id(); 
+        $profileUserId = $request->query('user_id'); // Nangkap ID user dari halaman Profil
 
-        $posts = Post::with(['user', 'comments.user'])
+        // 1. Mulai rakit query pake kodingan lu yang efisien
+        $query = Post::with(['user', 'comments.user'])
                     ->withCount('likes')
                     ->withCount('comments')
                     // Cek apakah user yang login udah nge-like postingan ini
-                    ->withExists(['likes as is_liked' => function($query) use ($userId) {
-                        $query->where('user_id', $userId);
-                    }])
-                    ->latest()
+                    ->withExists(['likes as is_liked' => function($q) use ($loginUserId) {
+                        $q->where('user_id', $loginUserId);
+                    }]);
+
+        // 2. FILTER: Kalau ada 'user_id' yang dikirim dari JS, berarti lagi di halaman Profil
+        if ($profileUserId) {
+            $query->where('user_id', $profileUserId);
+        }
+
+        // 3. Eksekusi query-nya
+        $posts = $query->latest()
                     ->skip($offset) 
                     ->take($limit)  
                     ->get();

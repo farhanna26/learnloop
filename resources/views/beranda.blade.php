@@ -44,7 +44,11 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14m7-7H5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     Upload
                 </button>
-                <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name ?? 'User') }}&background=8b5cf6&color=ffffff&rounded=true" class="h-9 w-9 rounded-xl shadow-sm" />
+                
+                <a href="/profile" class="transition-transform hover:scale-110 active:scale-95">
+                    <img src="{{ Auth::user()->photo ? asset(Auth::user()->photo) : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name ?? 'User').'&background=8b5cf6&color=ffffff&rounded=true' }}" class="h-9 w-9 rounded-xl object-cover shadow-sm border border-violet-100" title="Lihat Profil" />
+                </a>
+
             </div>
         </div>
     </header>
@@ -64,17 +68,55 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                                 Pesan
                             </div>
-                            <span class="flex h-2 w-2 rounded-full bg-red-500"></span>
+                        </a>
+                        <a href="/search" class="group flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">
+                            <div class="flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                                Search
+                            </div>
+                        </a>
+                        <a href="/notifications" class="group flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900 {{ request()->is('notifications') ? 'bg-violet-50 text-violet-700 font-bold' : '' }}">
+                            <div class="flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                Notifikasi
+                            </div>
+                            
+                            @php $unreadCount = auth()->user()->notifications()->where('is_read', false)->count(); @endphp
+                            @if($unreadCount > 0)
+                                <span class="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
+                                    {{ $unreadCount }}
+                                </span>
+                            @endif
+                        </a>
+                        <a href="/profile" class="group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            Profil
                         </a>
                     </nav>
                 </div>
             </aside>
-
-            <section id="feedContainer" class="lg:col-span-6 space-y-8">
-                <div class="relative overflow-hidden rounded-[32px] bg-white border border-slate-200 p-8 shadow-sm">
-                    <h1 class="text-2xl font-extrabold text-slate-900">Halo, Mahasiswa Kreatif! 👋</h1>
-                    <p class="text-sm text-slate-500 mt-1">Bagikan materi atau hasil karyamu hari ini.</p>
-                </div>
+                <section id="feedContainer" class="lg:col-span-6 space-y-8">
+                    
+                    @if(session('success'))
+                        <div class="animate-fade-in flex items-center gap-3 rounded-[24px] border border-emerald-100 bg-emerald-50 p-4 text-sm font-bold text-emerald-700 shadow-sm">
+                            <div class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-200/50">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            {{ session('success') }}
+                        </div>
+                    @endif
+                    <div class="relative overflow-hidden rounded-[32px] bg-white border border-slate-200 p-8 shadow-sm">
+                        <h1 class="text-2xl font-extrabold text-slate-900">Halo, Mahasiswa Kreatif! 👋</h1>
+                        <p class="text-sm text-slate-500 mt-1">Bagikan materi atau hasil karyamu hari ini.</p>
+                    </div>
 
                 <div id="postsWrapper" class="space-y-6"></div>
 
@@ -125,7 +167,7 @@
             <div class="p-4 bg-white border-t border-slate-100 shrink-0">
                 <form id="commentForm" class="flex items-center gap-3">
                     <input type="text" id="commentInput" placeholder="Tulis komentar..." class="w-full bg-slate-100 border-transparent focus:bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-200 rounded-full pl-5 pr-4 py-3 text-sm transition-all outline-none" required autocomplete="off">
-                    <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white rounded-full h-11 w-11 flex items-center justify-center transition-transform hover:scale-105 shrink-0">
+                    <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white rounded-2xl h-12 w-12 flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-lg shadow-violet-200 shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
                     </button>
                 </form>
@@ -181,6 +223,11 @@
             
             const userName = post.user?.name || 'User';
             const filePath = post.image ? `/storage/${post.image}` : null; 
+
+            // --- TAMBAHAN BARU: Cek foto profil si pembuat post ---
+            const userPhoto = post.user?.photo 
+                ? `/${post.user.photo}` 
+                : `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=7c3aed&color=ffffff&rounded=true`;
             
             const isVideo = post.image?.match(/\.(mp4|webm|ogg|mov)$/i);
             const isPDF = post.image?.match(/\.(pdf)$/i);
@@ -191,7 +238,7 @@
 
             article.innerHTML = `
                 <div class="flex items-center gap-3 p-5">
-                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=7c3aed&color=ffffff&rounded=true" class="h-11 w-11 rounded-full ring-2 ring-violet-50" />
+                    <img src="${userPhoto}" class="h-11 w-11 rounded-full ring-2 ring-violet-50" />
                     <div>
                         <p class="text-sm font-bold text-slate-900">${userName}</p>
                         <p class="text-[11px] text-slate-400 uppercase font-medium">${formatTimeAgo(post.created_at)}</p>
@@ -290,8 +337,14 @@
         });
 
         function appendCommentToUI(comment, isReply = false) {
-            console.log(`DEBUG -> User: ${comment.user?.name}, ID: ${comment.id}, Parent: ${comment.parent_id}, IsReply: ${isReply}`);
+            console.log("CEK DATA KOMENTAR:", comment);
             const userName = comment.user?.name || 'User';
+
+            // --- TAMBAHAN BARU: Cek foto profil si pengomen ---
+            const commenterPhoto = comment.user?.photo 
+                ? `${window.location.origin}/${comment.user.photo}` 
+                : `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=e2e8f0&color=475569`;
+
             const noDataHtml = commentsList.querySelector('p.text-slate-400');
             if (noDataHtml) noDataHtml.remove();
 
@@ -300,7 +353,7 @@
             commentDiv.className = `flex gap-3 ${isReply ? 'ml-10 mt-2' : 'mt-5'}`;
     
             commentDiv.innerHTML = `
-                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=e2e8f0&color=475569" class="h-8 w-8 rounded-full shrink-0">
+                <img src="${commenterPhoto}" class="h-8 w-8 rounded-full shrink-0">
                 <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm flex-1">
                     <div class="flex justify-between items-center mb-0.5">
                         <p class="text-[11px] font-bold text-slate-500">${userName}</p>
@@ -373,7 +426,8 @@
 
         // --- FETCH POSTS ---
         async function fetchPosts(offset, limit) {
-            if (isLoading) return;
+            // Tambahin || allPostsLoaded di sini biar kalau udah mentok dia beneran stop
+            if (isLoading || allPostsLoaded) return; 
             isLoading = true;
             loadingIndicator.classList.remove('hidden');
 
@@ -381,24 +435,29 @@
                 const response = await fetch(`/posts/fetch?offset=${offset}&limit=${limit}`);
                 const result = await response.json();
 
-                if (result.success && result.data.length > 0) {
-                    result.data.forEach(post => {
-                        postsWrapper.appendChild(renderPost(post));
-                    });
-                    currentOffset += result.data.length;
-                    if (result.data.length < limit) {
+                if (result.success) {
+                    if (result.data.length > 0) {
+                        result.data.forEach(post => {
+                            postsWrapper.appendChild(renderPost(post));
+                        });
+                        currentOffset += result.data.length;
+                        
+                        // Kalau jumlah yang ditarik kurang dari limit, berarti udah ujungnya
+                        if (result.data.length < limit) {
+                            allPostsLoaded = true;
+                            noMorePosts.classList.remove('hidden');
+                        }
+                    } else {
+                        // JIKA BALIKANNYA KOSONG (0), entah di awal atau pas scroll bawah
                         allPostsLoaded = true;
                         noMorePosts.classList.remove('hidden');
                     }
-                } else if (offset === 0) {
-                    noMorePosts.classList.remove('hidden');
-                    allPostsLoaded = true;
                 }
             } catch (error) {
                 console.error('Fetch Error:', error);
             } finally {
                 isLoading = false;
-                loadingIndicator.classList.add('hidden');
+                loadingIndicator.classList.add('hidden'); // Matiin spinnernya
             }
         }
 
