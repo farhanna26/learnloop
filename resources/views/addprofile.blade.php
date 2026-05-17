@@ -22,7 +22,7 @@
             <a href="/profile" class="text-sm font-bold text-slate-400 hover:text-violet-600 transition">Batal</a>
         </div>
 
-        <form action="/addprofile" method="POST" enctype="multipart/form-data" class="p-8 space-y-8">
+        <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data" class="p-8 space-y-8">
                 @if ($errors->any())
             <div class="mb-6 rounded-2xl bg-red-50 p-4 border border-red-100">
                 <ul class="text-sm font-bold text-red-500 space-y-1">
