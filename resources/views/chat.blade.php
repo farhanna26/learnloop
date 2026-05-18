@@ -29,10 +29,22 @@
                 </a>
                 
                 <div class="flex items-center gap-3">
-                    <img src="{{ $otherUser && $otherUser->photo ? asset($otherUser->photo) : 'https://ui-avatars.com/api/?name='.urlencode($chatTitle).'&background=8b5cf6&color=ffffff&rounded=true' }}" 
-                            class="h-10 w-10 rounded-full border border-slate-100 shadow-sm object-cover" alt="Profile">
+                    @if($room->type === 'group')
+                        <img src="{{ $room->photo ? asset('storage/' . $room->photo) : 'https://ui-avatars.com/api/?name='.urlencode($chatTitle).'&background=8b5cf6&color=ffffff&rounded=true' }}" 
+                             class="h-10 w-10 rounded-full border border-slate-100 shadow-sm object-cover" alt="Group Profile">
+                    @else
+                        <img src="{{ $otherUser && $otherUser->photo ? asset($otherUser->photo) : 'https://ui-avatars.com/api/?name='.urlencode($chatTitle).'&background=8b5cf6&color=ffffff&rounded=true' }}" 
+                             class="h-10 w-10 rounded-full border border-slate-100 shadow-sm object-cover" alt="Profile">
+                    @endif
+
                     <div>
-                        <h2 class="text-sm font-extrabold text-slate-900 leading-tight">{{ $chatTitle }}</h2>
+                        @if($room->type === 'group')
+                            <a href="/chat/group/{{ $room->id }}/info" class="hover:text-violet-600 transition-colors cursor-pointer group">
+                                <h2 class="text-sm font-extrabold text-slate-900 leading-tight group-hover:underline">{{ $chatTitle }}</h2>
+                            </a>
+                        @else
+                            <h2 class="text-sm font-extrabold text-slate-900 leading-tight">{{ $chatTitle }}</h2>
+                        @endif
                         <p class="text-[10px] text-slate-400 font-bold flex items-center gap-1 uppercase tracking-wider">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 block"></span> Online
                         </p>
@@ -56,7 +68,7 @@
                 @else
                     <div class="flex items-end gap-3 animate-fade-in lowercase">
                         <img src="{{ $msg->user && $msg->user->photo ? asset($msg->user->photo) : 'https://ui-avatars.com/api/?name='.urlencode($msg->username).'&background=f1f5f9&color=64748b&bold=true' }}" 
-                            alt="{{ $msg->username }}" class="w-8 h-8 rounded-full border border-slate-200 mb-1 object-cover">
+                             alt="{{ $msg->username }}" class="w-8 h-8 rounded-full border border-slate-200 mb-1 object-cover">
                         <div class="max-w-[75%]">
                             <span class="text-[10px] text-slate-400 font-bold ml-1 mb-1 block tracking-wide capitalize">{{ $msg->username }}</span>
                             <div class="bg-white text-slate-800 px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm border border-slate-100">
@@ -75,7 +87,7 @@
                 </div>
                 
                 <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white rounded-2xl h-12 w-12 flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-lg shadow-violet-200 shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <svg xmlns="http://www.w3.org/2000/xl" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                     </svg>
                 </button>

@@ -109,23 +109,40 @@
                             </div>
                             
                             <div class="flex-1">
-                                <p class="text-sm text-slate-800">
-                                    <span class="font-bold text-slate-900">{{ $notification->sender->name }}</span> 
+                                <p class="text-sm">
+                                    <span class="font-extrabold text-slate-900">{{ $notification->sender->name }}</span> 
                                     @if($notification->type == 'follow')
                                         mulai mengikuti Anda.
                                     @elseif($notification->type == 'like')
                                         menyukai postingan Anda.
+                                    @elseif($notification->type == 'group_invite')
+                                        mengundang mu bergabung ke grup diskusi.
                                     @endif
-                                </p>
-                                <p class="text-[11px] text-slate-400 uppercase font-bold tracking-wider mt-1">
-                                    {{ $notification->created_at->diffForHumans() }}
                                 </p>
                             </div>
 
                             @if($notification->type == 'follow')
-                                <a href="/profile/{{ $notification->sender_id }}" class="rounded-xl bg-slate-50 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-violet-100 hover:text-violet-700 transition-all">
-                                    Profil
-                                </a>
+                                <div class="mt-4 pt-4 border-t border-slate-50 flex justify-center">
+                                    <a href="/profile/{{ $notification->sender_id }}" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 text-slate-700 text-xs font-bold hover:bg-slate-100 transition shadow-sm">
+                                        <img src="{{ $notification->sender->photo ? asset($notification->sender->photo) : 'https://ui-avatars.com/api/?name='.urlencode($notification->sender->name).'&background=f1f5f9&color=64748b' }}" class="h-4 w-4 rounded-full" />
+                                        Profil Preview
+                                    </a>
+                                </div>
+                            @elseif($notification->type == 'group_invite')
+                                <div class="mt-4 pt-4 border-t border-slate-50 flex items-center justify-center gap-3">
+                                    <form action="/chat/group/accept/{{ $notification->id }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="px-6 py-2 rounded-xl bg-violet-600 text-white text-xs font-bold hover:bg-violet-700 transition shadow-sm shadow-violet-200 active:scale-95">
+                                            Terima
+                                        </button>
+                                    </form>
+                                    <form action="/chat/group/reject/{{ $notification->id }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="px-6 py-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-bold hover:bg-slate-200 transition shadow-sm active:scale-95">
+                                            Tolak
+                                        </button>
+                                    </form>
+                                </div>
                             @endif
                         </div>
                     @empty
@@ -133,7 +150,7 @@
                             <div class="flex justify-center mb-4 text-slate-200">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>
                             </div>
-                            <p class="text-slate-500 font-medium italic">Belum ada aktivitas baru nih, beb.</p>
+                            <p class="text-slate-500 font-medium italic">Belum ada aktivitas baru nih.</p>
                         </div>
                     @endforelse
                 </div>

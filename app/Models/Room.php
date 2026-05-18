@@ -9,7 +9,7 @@ class Room extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'type'];
+    protected $fillable = ['name', 'type', 'photo', 'description'];
 
     // 👈 INI WAJIB ADA BIAR KAMARNYA BISA DIISI BANYAK ORANG
     public function users()

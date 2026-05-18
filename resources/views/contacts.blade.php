@@ -12,11 +12,13 @@
         .glass-effect { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
         .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.05); }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
-<body class="min-h-screen text-slate-900">
+<body class="min-h-screen text-slate-900 relative">
 
-    <header class="sticky top-0 z-50 border-b border-slate-200 glass-effect">
+    <header class="sticky top-0 z-40 border-b border-slate-200 glass-effect">
         <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
             <div class="flex flex-1 items-center gap-8">
                 <a href="/beranda" class="flex items-center gap-2">
@@ -76,20 +78,31 @@
             <section class="lg:col-span-9 space-y-8">
                 
                 <div class="space-y-6">
-                    <div class="flex items-center gap-3">
-                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 text-violet-600 shadow-sm shadow-violet-50">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 text-violet-600 shadow-sm shadow-violet-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                            </div>
+                            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Grup Mahasiswa</h2>
                         </div>
-                        <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Grup Mahasiswa</h2>
+                        
+                        <button onclick="document.getElementById('groupModal').classList.remove('hidden')" class="flex items-center gap-2 bg-slate-900 hover:bg-violet-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+                            Buat Grup
+                        </button>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         @forelse($groups as $group)
                             <div class="card-hover flex items-center justify-between p-5 bg-white rounded-[28px] border border-slate-200 shadow-sm">
                                 <div class="flex items-center gap-4">
-                                    <div class="h-14 w-14 rounded-2xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-violet-100">
-                                        #
-                                    </div>
+                                    @if($group->photo)
+                                        <img src="{{ asset('storage/' . $group->photo) }}" class="h-14 w-14 rounded-2xl object-cover shadow-lg border border-violet-100" alt="Group Photo" />
+                                    @else
+                                        <div class="h-14 w-14 rounded-2xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-violet-100">
+                                            #
+                                        </div>
+                                    @endif
                                     <div>
                                         <h3 class="font-bold text-slate-900 line-clamp-1 uppercase tracking-tight">{{ $group->name }}</h3>
                                         <div class="flex items-center gap-1.5 mt-0.5">
@@ -104,7 +117,7 @@
                             </div>
                         @empty
                             <div class="col-span-full p-12 text-center bg-white rounded-[32px] border border-dashed border-slate-300">
-                                <p class="text-slate-400 font-medium italic uppercase text-sm">Belum ada grup diskusi aktif, beb.</p>
+                                <p class="text-slate-400 font-medium italic text-sm">Belum ada grup diskusi aktif. Bikin grup bareng mutual lu yuk!</p>
                             </div>
                         @endforelse
                     </div>
@@ -129,7 +142,7 @@
                                     </div>
                                     <div>
                                         <h3 class="font-bold text-slate-900 text-lg tracking-tight">{{ $user->name }}</h3>
-                                        <p class="text-[11px] text-slate-400 font-bold uppercase tracking-widest">Mahasiswa PSTI</p>
+                                        <p class="text-[11px] text-slate-400 font-bold uppercase tracking-widest">Mahasiswa</p>
                                     </div>
                                 </div>
                                 <a href="/chat/private/{{ $user->id }}" class="px-7 py-3 bg-slate-900 hover:bg-violet-600 text-white text-xs font-bold rounded-2xl shadow-lg shadow-slate-100 transition-all uppercase tracking-wider">
@@ -138,7 +151,7 @@
                             </div>
                         @empty
                             <div class="p-12 text-center bg-white rounded-[32px] border border-dashed border-slate-300">
-                                <p class="text-slate-400 font-medium italic uppercase text-sm">Belum ada teman untuk diajak ghibah materi, beb.</p>
+                                <p class="text-slate-400 font-medium italic text-sm">Lu belum follow siapa-siapa, beb. Cari temen di menu Search gih!</p>
                             </div>
                         @endforelse
                     </div>
@@ -147,6 +160,46 @@
             </section>
         </div>
     </main>
+
+    <div id="groupModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="w-full max-w-md rounded-[32px] bg-white p-8 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-extrabold text-slate-900">Buat Grup Baru</h3>
+                <button onclick="document.getElementById('groupModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 bg-slate-100 p-2 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            
+            <form action="/chat/group/create" method="POST">
+                @csrf
+                <div class="mb-6">
+                    <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Nama Grup</label>
+                    <input type="text" name="name" placeholder="Misal: Tim Mabar RPL..." class="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 rounded-2xl px-5 py-3.5 text-sm transition-all outline-none" required>
+                </div>
+
+                <div class="mb-8">
+                    <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Pilih Anggota (Mutuals Only)</label>
+                    <div class="max-h-48 overflow-y-auto custom-scrollbar space-y-2 pr-2">
+                        @forelse($mutuals as $mutual)
+                            <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors">
+                                <input type="checkbox" name="members[]" value="{{ $mutual->id }}" class="w-4 h-4 text-violet-600 rounded focus:ring-violet-500">
+                                <img src="{{ $mutual->photo ? asset($mutual->photo) : 'https://ui-avatars.com/api/?name='.urlencode($mutual->name).'&background=f1f5f9&color=64748b' }}" class="w-8 h-8 rounded-full object-cover">
+                                <span class="text-sm font-bold text-slate-800">{{ $mutual->name }}</span>
+                            </label>
+                        @empty
+                            <div class="p-4 bg-slate-50 rounded-xl text-center">
+                                <p class="text-xs text-slate-500 font-medium">Belum ada mutual. Lu harus saling follow dulu buat bisa masukin ke grup.</p>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-violet-200 transition-transform active:scale-95">
+                    Kirim Undangan Grup
+                </button>
+            </form>
+        </div>
+    </div>
 
 </body>
 </html>

@@ -46,6 +46,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/chat/private/{targetUserId}', [ChatController::class, 'createOrFindPrivateChat']);
     Route::get('/chat/{roomId}', [ChatController::class, 'index']);
     Route::post('/chat/send', [ChatController::class, 'store']);
+    Route::post('/chat/group/create', [ChatController::class, 'createGroup']);
+    Route::post('/chat/group/accept/{notificationId}', [ChatController::class, 'acceptInvite']);
+    Route::post('/chat/group/reject/{notificationId}', [ChatController::class, 'rejectInvite']);
+
+    // --- RUTE GROUP SETTINGS & INFO ---
+    Route::get('/chat/group/{roomId}/info', [ChatController::class, 'groupInfo'])->name('chat.group.info');
+    Route::post('/chat/group/{roomId}/update', [ChatController::class, 'updateGroup'])->name('chat.group.update');
+    Route::post('/chat/group/{roomId}/invite', [ChatController::class, 'inviteToGroup'])->name('chat.group.invite');
 
     // 4. === RUTE PROFIL ===
     
