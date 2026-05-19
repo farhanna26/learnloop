@@ -92,45 +92,56 @@ class ChatController extends Controller
         return redirect('/chat/' . $room->id);
     }
 
-    // 4. Daftar Kontak & Grup (LOGIKA BARU)
+    // 4. Daftar Kontak, Grup & Kelas
     public function contactList()
     {
         $user = auth()->user();
         $myId = $user->id;
 
-        // A. Pesan Pribadi: Cuma nampilin yang KITA FOLLOW
+        // A. Pesan Pribadi (Following)
         $users = $user->followings;
 
-        // B. Grup: Nampilin grup yang kita udah gabung
+        // B. Grup Diskusi Standar
         $groups = Room::where('type', 'group')
             ->whereHas('users', function ($query) use ($myId) {
                 $query->where('user_id', $myId);
             })->get();
 
-        // C. Cari Mutuals (Saling Follow) buat modal Invite Grup
+        // C. Ruang Kelas Pembelajaran (BARU)
+        $classrooms = Room::where('type', 'classroom')
+            ->whereHas('users', function ($query) use ($myId) {
+                $query->where('user_id', $myId);
+            })->get();
+
+        // D. Mutuals (Saling Follow) buat modal Invite
         $followerIds = $user->followers->pluck('id')->toArray();
-        // Dari orang yang kita follow, saring yang ID-nya ada di daftar follower kita
         $mutuals = $user->followings->whereIn('id', $followerIds);
 
-        return view('contacts', compact('users', 'groups', 'mutuals'));
+        return view('contacts', compact('users', 'groups', 'classrooms', 'mutuals'));
     }
 
-    // 5. Fungsi Bikin Grup & Ngirim Undangan
+    // 5. Fungsi Bikin Grup/Kelas & Ngirim Undangan
     public function createGroup(Request $request)
     {
-        // 1. Validasi Inputan
+        // 1. Validasi Inputan (Tambah validasi type)
         $request->validate([
             'name' => 'required|string|max:255',
-            'members' => 'nullable|array', // array isinya ID mutuals yang diceklis
+            'type' => 'required|in:group,classroom', // Bisa grup biasa atau ruang kelas
+            'members' => 'nullable|array',
             'members.*' => 'exists:users,id'
         ]);
 
         $user = auth()->user();
 
-        // 2. Bikin Room Grupnya di Database
+        // Keamanan: Cuma Creator yang boleh bikin Ruang Kelas!
+        if ($request->type === 'classroom' && $user->role !== 'creator') {
+            return back()->with('error', 'Cuma Creator yang bisa bikin Ruang Kelas, beb!');
+        }
+
+        // 2. Bikin Room di Database
         $room = Room::create([
             'name' => $request->name,
-            'type' => 'group'
+            'type' => $request->type // Simpen tipenya sesuai yang dipilih
         ]);
 
         // 3. Masukin si Pembuat Grup (Kita) langsung ke dalem room

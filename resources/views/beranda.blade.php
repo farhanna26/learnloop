@@ -118,7 +118,27 @@
                         <p class="text-sm text-slate-500 mt-1">Bagikan materi atau hasil karyamu hari ini.</p>
                     </div>
 
-                <div id="postsWrapper" class="space-y-6"></div>
+                    <div class="my-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in">
+                        <div class="flex items-center gap-2 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm w-fit">
+                            <button id="tab-portfolio" onclick="switchFeedType('portfolio')" class="px-5 py-2 rounded-xl text-sm font-bold bg-slate-900 text-white transition-all shadow-sm">
+                                Portofolio
+                            </button>
+                            <button id="tab-learning" onclick="switchFeedType('learning')" class="px-5 py-2 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-all">
+                                Pembelajaran
+                            </button>
+                        </div>
+
+                        @if(auth()->user()->role === 'creator')
+                            <button onclick="document.getElementById('learningUploadModal').classList.remove('hidden')" class="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md shadow-violet-200 active:scale-95">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Upload Materi Pembelajaran
+                            </button>
+                        @endif
+                    </div>
+
+                    <div id="postsWrapper" class="space-y-6"></div>
 
                 <div id="loadingIndicator" class="hidden text-center py-6">
                     <div class="inline-block animate-spin">
@@ -175,7 +195,72 @@
         </div>
     </div>
 
+    <div id="learningUploadModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="w-full max-w-lg rounded-[32px] bg-white p-8 shadow-2xl">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-extrabold text-slate-900">Upload Materi Baru</h3>
+                <button onclick="document.getElementById('learningUploadModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 p-2 rounded-full transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            @php $categories = \App\Models\Category::all(); @endphp
+
+            <form id="learningUploadForm" onsubmit="submitLearningPost(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Kategori Materi</label>
+                    <select id="learningCategory" class="w-full rounded-2xl border border-slate-200 p-3.5 text-sm font-medium outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all bg-slate-50 cursor-pointer" required>
+                        <option value="" disabled selected>Pilih Kategori Pembelajaran...</option>
+                        @foreach($categories as $category)
+                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Judul / Deskripsi Materi</label>
+                    <textarea id="learningCaption" rows="3" class="w-full rounded-2xl border border-slate-200 p-4 text-sm outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all bg-slate-50" placeholder="Jelaskan isi materi ini..." required></textarea>
+                </div>
+
+                <div class="mb-8">
+                    <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">File Materi (PDF/Video/Gambar)</label>
+                    <input type="file" id="learningFile" class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 transition-colors cursor-pointer" accept="image/*,video/*,.pdf" required>
+                </div>
+
+                <button type="submit" id="btnSubmitLearning" class="w-full rounded-2xl bg-violet-600 py-4 text-sm font-bold text-white hover:bg-violet-700 transition-all shadow-lg shadow-violet-200 active:scale-95">Upload Materi Sekarang</button>
+            </form>
+        </div>
+    </div>
     <script>
+        // Variabel global buat nentuin lagi di tab mana
+        let currentFeedType = 'portfolio';
+
+        function switchFeedType(type) {
+            currentFeedType = type;
+            
+            const btnPorto = document.getElementById('tab-portfolio');
+            const btnLearn = document.getElementById('tab-learning');
+
+            // Reset styling
+            btnPorto.className = "px-5 py-2 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-all";
+            btnLearn.className = "px-5 py-2 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-all";
+
+            if(type === 'portfolio') {
+                btnPorto.className = "px-5 py-2 rounded-xl text-sm font-bold bg-slate-900 text-white transition-all shadow-sm";
+            } else {
+                btnLearn.className = "px-5 py-2 rounded-xl text-sm font-bold bg-slate-900 text-white transition-all shadow-sm";
+            }
+
+            // JURUS RESET FEED
+            postsWrapper.innerHTML = ''; // Kosongin postingan yang lagi nampil
+            currentOffset = 0; // Balikin hitungan ke nol
+            allPostsLoaded = false; 
+            noMorePosts.classList.add('hidden'); // Sembunyiin teks "Sudah di penghujung"
+            
+            // Tarik data ulang dengan tipe yang baru!
+            fetchPosts(0, 5);
+        }
+
         const uploadBtn = document.getElementById('uploadBtn');
         const fileInput = document.getElementById('fileInput');
         const uploadModal = document.getElementById('uploadModal');
@@ -244,7 +329,10 @@
                     
                     <div>
                         <a href="/profile/${post.user_id}" class="group cursor-pointer">
-                            <p class="text-sm font-bold text-slate-900 group-hover:text-violet-600 group-hover:underline transition-colors">${userName}</p>
+                            <div class="flex items-center gap-2">
+                                <p class="text-sm font-bold text-slate-900 group-hover:text-violet-600 group-hover:underline transition-colors">${userName}</p>
+                                ${post.type === 'learning' && post.category ? `<span class="bg-violet-100 text-violet-700 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">${post.category.name}</span>` : ''}
+                            </div>
                         </a>
                         <p class="text-[11px] text-slate-400 uppercase font-medium">${formatTimeAgo(post.created_at)}</p>
                     </div>
@@ -437,7 +525,7 @@
             loadingIndicator.classList.remove('hidden');
 
             try {
-                const response = await fetch(`/posts/fetch?offset=${offset}&limit=${limit}`);
+                const response = await fetch(`/posts/fetch?offset=${offset}&limit=${limit}&type=${currentFeedType}`);
                 const result = await response.json();
 
                 if (result.success) {
@@ -546,6 +634,47 @@
         });
 
         closeModal.addEventListener('click', () => uploadModal.classList.add('hidden'));
+
+        // Fungsi Eksekusi Upload Materi
+        async function submitLearningPost(e) {
+            e.preventDefault();
+            const caption = document.getElementById('learningCaption').value;
+            const categoryId = document.getElementById('learningCategory').value;
+            const file = document.getElementById('learningFile').files[0];
+            const btn = document.getElementById('btnSubmitLearning');
+
+            if (!caption || !file || !categoryId) return alert("Semua kolom wajib diisi, beb!");
+
+            btn.innerText = "Mengunggah Materi...";
+            btn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('content', caption);
+            formData.append('image', file);
+            formData.append('type', 'learning'); // Otomatis nembak tipe learning
+            formData.append('category_id', categoryId); // Kirim ID kategori
+
+            try {
+                const response = await fetch('/posts', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-CSRF-TOKEN': csrfToken }
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('Materi sukses mendarat!');
+                    document.getElementById('learningUploadModal').classList.add('hidden');
+                    document.getElementById('learningUploadForm').reset();
+                    // Nanti kita tambahin logika refresh tab Pembelajaran di sini
+                }
+            } catch (error) {
+                alert("Waduh, upload gagal!");
+            } finally {
+                btn.innerText = "Upload Materi Sekarang";
+                btn.disabled = false;
+            }
+        }
     </script>
 </body>
 </html>

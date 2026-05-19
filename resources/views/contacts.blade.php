@@ -78,6 +78,42 @@
             <section class="lg:col-span-9 space-y-8">
                 
                 <div class="space-y-6">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 shadow-sm shadow-emerald-50">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 14v6.5" /></svg>
+                        </div>
+                        <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Ruang Kelas Pembelajaran</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @forelse($classrooms as $class)
+                            <div class="card-hover flex items-center justify-between p-5 bg-white rounded-[28px] border border-slate-200 shadow-sm">
+                                <div class="flex items-center gap-4">
+                                    @if($class->photo)
+                                        <img src="{{ asset('storage/' . $class->photo) }}" class="h-14 w-14 rounded-2xl object-cover shadow-lg border border-emerald-100" />
+                                    @else
+                                        <div class="h-14 w-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-emerald-100">
+                                            🎓
+                                        </div>
+                                    @endif
+                                    <div>
+                                        <h3 class="font-bold text-slate-900 line-clamp-1 uppercase tracking-tight">{{ $class->name }}</h3>
+                                        <p class="text-[10px] text-emerald-500 font-bold uppercase tracking-wider mt-0.5">Ruang Kelas Aktif</p>
+                                    </div>
+                                </div>
+                                <a href="/chat/{{ $class->id }}" class="px-5 py-2.5 bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white text-xs font-bold rounded-xl transition-all shadow-sm">
+                                    Masuk
+                                </a>
+                            </div>
+                        @empty
+                            <div class="col-span-full p-8 text-center bg-white rounded-[32px] border border-dashed border-slate-300">
+                                <p class="text-slate-400 font-medium italic text-sm">Belum ada ruang kelas yang kamu ikutin nih</p>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+
+                <div class="space-y-6">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 text-violet-600 shadow-sm shadow-violet-50">
@@ -175,6 +211,30 @@
                 <div class="mb-6">
                     <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Nama Grup</label>
                     <input type="text" name="name" placeholder="Misal: Tim Mabar RPL..." class="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 rounded-2xl px-5 py-3.5 text-sm transition-all outline-none" required>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Tipe Ruangan</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="type" value="group" class="peer sr-only" checked>
+                            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 text-center hover:bg-slate-100 peer-checked:border-violet-600 peer-checked:bg-violet-50 peer-checked:text-violet-700 transition-all">
+                                <span class="text-sm font-bold">Grup Diskusi</span>
+                            </div>
+                        </label>
+                        
+                        @if(auth()->user()->role === 'creator')
+                        <label class="cursor-pointer">
+                            <input type="radio" name="type" value="classroom" class="peer sr-only">
+                            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 text-center hover:bg-slate-100 peer-checked:border-emerald-600 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 transition-all">
+                                <span class="text-sm font-bold">Ruang Kelas</span>
+                            </div>
+                        </label>
+                        @endif
+                    </div>
+                    @if(auth()->user()->role !== 'creator')
+                        <p class="text-[10px] text-slate-400 mt-2 ml-1 italic">*Hanya Creator yang bisa membuat Ruang Kelas.</p>
+                    @endif
                 </div>
 
                 <div class="mb-8">
