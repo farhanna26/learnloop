@@ -238,9 +238,14 @@
 
             article.innerHTML = `
                 <div class="flex items-center gap-3 p-5">
-                    <img src="${userPhoto}" class="h-11 w-11 rounded-full ring-2 ring-violet-50" />
+                    <a href="/profile/${post.user_id}" class="shrink-0 transition-transform hover:scale-110 active:scale-95 cursor-pointer">
+                        <img src="${userPhoto}" class="h-11 w-11 rounded-full ring-2 ring-violet-50 object-cover shadow-sm" />
+                    </a>
+                    
                     <div>
-                        <p class="text-sm font-bold text-slate-900">${userName}</p>
+                        <a href="/profile/${post.user_id}" class="group cursor-pointer">
+                            <p class="text-sm font-bold text-slate-900 group-hover:text-violet-600 group-hover:underline transition-colors">${userName}</p>
+                        </a>
                         <p class="text-[11px] text-slate-400 uppercase font-medium">${formatTimeAgo(post.created_at)}</p>
                     </div>
                 </div>

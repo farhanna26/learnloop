@@ -86,17 +86,30 @@ class PostController extends Controller
     {
         $request->validate([
             'body' => 'required|string',
-            'parent_id' => 'nullable|exists:comments,id' // Validasi parent_id kalau ada
+            'parent_id' => 'nullable|exists:comments,id' 
         ]);
 
         $comment = Comment::create([
             'user_id' => auth()->id(),
             'post_id' => $postId,
-            'parent_id' => $request->parent_id, // Masukin parent_id-nya
+            'parent_id' => $request->parent_id,
             'body'    => $request->body
         ]);
 
         $comment->load('user');
+
+        // --- LOGIKA NOTIFIKASI KOMENTAR ---
+        $post = Post::findOrFail($postId);
+        // Jangan kirim notif kalau ngomen postingan sendiri
+        if ($post->user_id !== auth()->id()) {
+            \App\Models\Notification::create([
+                'user_id' => $post->user_id,      // Pemilik Postingan
+                'sender_id' => auth()->id(),      // Yang Komen
+                'type' => 'comment',
+                'reference_id' => $post->id,      // ID Postingan
+                'is_read' => false
+            ]);
+        }
 
         return response()->json([
             'success' => true,
@@ -108,7 +121,7 @@ class PostController extends Controller
     // Sistem Toggle Like (Like/Unlike)
     public function toggleLike($postId)
     {
-        $userId = auth()->id(); // AMAN DARI HARDCODE
+        $userId = auth()->id(); 
         $existingLike = Like::where('user_id', $userId)->where('post_id', $postId)->first();
 
         if ($existingLike) {
@@ -121,6 +134,37 @@ class PostController extends Controller
             'post_id' => $postId
         ]);
 
+        // --- LOGIKA NOTIFIKASI LIKE ---
+        $post = Post::findOrFail($postId);
+        if ($post->user_id !== $userId) {
+            \App\Models\Notification::create([
+                'user_id' => $post->user_id,
+                'sender_id' => $userId,
+                'type' => 'like',
+                'reference_id' => $post->id,
+                'is_read' => false
+            ]);
+        }
+
         return response()->json(['status' => 'liked', 'message' => 'Like berhasil'], 201);
+    }
+
+    // Mengambil 1 detail postingan beserta komentar (Untuk Modal Notifikasi)
+    public function show($id)
+    {
+        try {
+            // Kita tarik data Postingan, sekalian bawa data User pembuatnya dan data Komentar+Usernya
+            $post = Post::with(['user', 'comments.user'])->findOrFail($id);
+
+            return response()->json([
+                'success' => true,
+                'data'    => $post
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Postingan tidak ditemukan'
+            ], 404);
+        }
     }
 }

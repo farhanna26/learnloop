@@ -27,7 +27,8 @@
                 </a>
             </div>
             <div class="flex items-center gap-3">
-                <a href="/profile" class="transition-transform hover:scale-110">
+                <span class="text-sm font-bold text-slate-700 hidden md:block">{{ Auth::user()->name }}</span>
+                <a href="/profile" class="transition-transform hover:scale-110 active:scale-95">
                     <img src="{{ Auth::user()->photo ? asset(Auth::user()->photo) : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name ?? 'User').'&background=8b5cf6&color=ffffff&rounded=true' }}" 
                          class="h-9 w-9 rounded-xl object-cover shadow-sm border border-violet-100" />
                 </a>
