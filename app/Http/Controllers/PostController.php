@@ -14,19 +14,20 @@ class PostController extends Controller
     {
         $offset = $request->query('offset', 0);
         $limit = $request->query('limit', 5);
+        $type = $request->query('type', 'portfolio'); // Nangkap tipe dari JS, default 'portfolio'
         $loginUserId = auth()->id(); 
-        $profileUserId = $request->query('user_id'); // Nangkap ID user dari halaman Profil
+        $profileUserId = $request->query('user_id'); 
 
-        // 1. Mulai rakit query pake kodingan lu yang efisien
-        $query = Post::with(['user', 'comments.user'])
+        // 1. Mulai rakit query
+        $query = Post::with(['user', 'comments.user', 'category']) // Bawa data kategori sekalian
                     ->withCount('likes')
                     ->withCount('comments')
-                    // Cek apakah user yang login udah nge-like postingan ini
                     ->withExists(['likes as is_liked' => function($q) use ($loginUserId) {
                         $q->where('user_id', $loginUserId);
-                    }]);
+                    }])
+                    ->where('type', $type); // FILTER TIPE POSTINGAN DI SINI!
 
-        // 2. FILTER: Kalau ada 'user_id' yang dikirim dari JS, berarti lagi di halaman Profil
+        // 2. FILTER: Kalau ada 'user_id'
         if ($profileUserId) {
             $query->where('user_id', $profileUserId);
         }
@@ -50,6 +51,8 @@ class PostController extends Controller
         $request->validate([
             'content' => 'required|string',
             'image' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,pdf|max:10240', 
+            'type' => 'nullable|in:portfolio,learning', // Terima tipe postingan
+            'category_id' => 'nullable|exists:categories,id' // Terima ID Kategori
         ]);
 
         $imagePath = null;
@@ -61,9 +64,11 @@ class PostController extends Controller
         }
 
         $post = Post::create([
-            'user_id' => auth()->id(), // AMAN DARI HARDCODE
+            'user_id' => auth()->id(),
             'content' => $request->content,
             'image'   => $imagePath, 
+            'type'    => $request->type ?? 'portfolio', // Kalau kosong, default portfolio
+            'category_id' => $request->category_id
         ]);
 
         $post->load('user');

@@ -165,12 +165,24 @@
                                 Bergabung {{ $user->created_at->format('M Y') }}
                             </div>
                         </div>
+                    </div> <div class="flex border-t border-slate-100 mt-4">
+                        <button id="tab-portfolio" onclick="switchProfileTab('portfolio')" class="flex-1 py-4 text-sm font-bold text-slate-900 border-b-4 border-violet-600 hover:bg-slate-50 transition-colors">
+                            Portofolio
+                        </button>
+                        <button id="tab-learning" onclick="switchProfileTab('learning')" class="flex-1 py-4 text-sm font-bold text-slate-500 border-b-4 border-transparent hover:bg-slate-50 hover:text-slate-900 transition-colors">
+                            Pembelajaran
+                        </button>
                     </div>
+                    
                 </div>
 
-                <div id="postsWrapper" class="space-y-6">
-                    <div class="text-center py-10 bg-white rounded-[32px] border border-slate-200">
-                        <p class="text-slate-500 font-medium">Postingan lu bakal muncul di sini.</p>
+                <div id="profilePostsWrapper" class="space-y-6"></div>
+
+                <div id="loadingIndicator" class="hidden text-center py-6">
+                    <div class="inline-block animate-spin text-violet-600">
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
                     </div>
                 </div>
 
@@ -214,21 +226,55 @@
     // Ambil ID user yang lagi dilihat profilnya
     const profileUserId = "{{ $user->id }}"; 
     
-    const postsWrapper = document.getElementById('postsWrapper');
+    // Variabel Global
+    const postsWrapper = document.getElementById('profilePostsWrapper');
+    const loadingIndicator = document.getElementById('loadingIndicator');
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    
+    // Modal Komentar
     const commentModal = document.getElementById('commentModal');
     const closeCommentModal = document.getElementById('closeCommentModal');
     const commentsList = document.getElementById('commentsList');
     const commentForm = document.getElementById('commentForm');
     const commentInput = document.getElementById('commentInput');
+    
     let currentActivePostId = null; 
     let globalPostsData = {}; 
     let currentParentId = null;
 
+    // Variabel Fetch Data
+    let currentTab = 'portfolio';
     let currentOffset = 0;
     let isLoading = false;
-    let allPostsLoaded = false;
+    let allLoaded = false;
 
+    // --- FUNGSI GANTI TAB ---
+    function switchProfileTab(type) {
+        currentTab = type;
+        const btnPorto = document.getElementById('tab-portfolio');
+        const btnLearn = document.getElementById('tab-learning');
+
+        // Class buat tab yang AKTIF (Teks item, garis bawah ungu)
+        const activeClass = "flex-1 py-4 text-sm font-bold text-slate-900 border-b-4 border-violet-600 hover:bg-slate-50 transition-colors";
+        // Class buat tab yang TIDAK AKTIF (Teks abu-abu, nggak ada garis bawah)
+        const inactiveClass = "flex-1 py-4 text-sm font-bold text-slate-500 border-b-4 border-transparent hover:bg-slate-50 hover:text-slate-900 transition-colors";
+
+        if(type === 'portfolio') {
+            btnPorto.className = activeClass;
+            btnLearn.className = inactiveClass;
+        } else {
+            btnPorto.className = inactiveClass;
+            btnLearn.className = activeClass;
+        }
+
+        // Reset Data & Fetch Ulang
+        postsWrapper.innerHTML = '';
+        currentOffset = 0;
+        allLoaded = false;
+        fetchProfilePosts();
+    }
+
+    // --- FUNGSI FORMAT WAKTU ---
     function formatTimeAgo(date) {
         const now = new Date();
         const postDate = new Date(date);
@@ -239,9 +285,8 @@
         return Math.floor(seconds / 86400) + ' hari lalu';
     }
 
-    // Fungsi Render Card Postingan (Sama Persis Kaya Beranda)
+    // --- FUNGSI RENDER POST ---
     function renderPost(post) {
-        // 1. TAMBAHIN BARIS INI DI PALING ATAS FUNGSI:
         globalPostsData[post.id] = post;
         const article = document.createElement('article');
         article.className = 'card-hover overflow-hidden rounded-[32px] border border-slate-200 bg-white mb-6';
@@ -250,7 +295,6 @@
         const userName = post.user?.name || 'User';
         const filePath = post.image ? `/storage/${post.image}` : null; 
 
-        // --- TAMBAHAN BARU: Cek foto profil si pembuat post ---
         const userPhoto = post.user?.photo 
             ? `/${post.user.photo}` 
             : `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=7c3aed&color=ffffff&rounded=true`;
@@ -265,7 +309,10 @@
             <div class="flex items-center gap-3 p-5">
                 <img src="${userPhoto}" class="h-11 w-11 rounded-full ring-2 ring-violet-50" />
                 <div>
-                    <p class="text-sm font-bold text-slate-900">${userName}</p>
+                    <div class="flex items-center gap-2">
+                        <p class="text-sm font-bold text-slate-900 group-hover:text-violet-600 group-hover:underline transition-colors">${userName}</p>
+                        ${post.type === 'learning' && post.category ? `<span class="bg-violet-100 text-violet-700 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">${post.category.name}</span>` : ''}
+                    </div>
                     <p class="text-[11px] text-slate-400 uppercase font-medium">${formatTimeAgo(post.created_at)}</p>
                 </div>
             </div>
@@ -299,81 +346,86 @@
         return article;
     }
 
-    // Fungsi Fetch Postingan
-    async function fetchUserPosts(offset, limit) {
-        if (isLoading || allPostsLoaded) return;
+    // --- FUNGSI FETCH POSTINGAN AJAX ---
+    async function fetchProfilePosts() {
+        if (isLoading || allLoaded) return;
         isLoading = true;
+        loadingIndicator.classList.remove('hidden');
 
         try {
-            // PERHATIKAN INI: Kita tambahin parameter user_id di URL
-            const response = await fetch(`/posts/fetch?offset=${offset}&limit=${limit}&user_id=${profileUserId}`);
+            // Nembak ke API yang udah bawa parameter type dan user_id
+            const response = await fetch(`/posts/fetch?offset=${currentOffset}&limit=5&type=${currentTab}&user_id=${profileUserId}`);
             const result = await response.json();
 
             if (result.success) {
-                // Kalau ini load pertama kali, bersihin placeholder-nya dulu
-                if (offset === 0) {
-                    postsWrapper.innerHTML = ''; 
-                }
-
                 if (result.data.length > 0) {
                     result.data.forEach(post => {
                         postsWrapper.appendChild(renderPost(post));
                     });
                     currentOffset += result.data.length;
-                    
-                    if (result.data.length < limit) {
-                        allPostsLoaded = true;
+                } else {
+                    allLoaded = true;
+                    // Teks kalau kosong
+                    if(currentOffset === 0) {
+                         postsWrapper.innerHTML = `
+                            <div class="text-center py-10 bg-white rounded-[32px] border border-slate-200">
+                                <p class="text-slate-500 font-medium italic">Belum ada postingan ${currentTab} nih.</p>
+                            </div>`;
                     }
-                } else if (offset === 0) {
-                    // Kalau emang user ini belum pernah posting sama sekali
-                    postsWrapper.innerHTML = `
-                        <div class="text-center py-10 bg-white rounded-[32px] border border-slate-200">
-                            <p class="text-slate-500 font-medium">Belum ada postingan.</p>
-                        </div>
-                    `;
-                    allPostsLoaded = true;
                 }
             }
         } catch (error) {
             console.error('Fetch Error:', error);
         } finally {
             isLoading = false;
+            loadingIndicator.classList.add('hidden');
         }
     }
 
-    // Panggil fungsi saat halaman pertama kali dibuka
-    fetchUserPosts(0, 5);
+    // Panggil saat pertama kali buka halaman
+    fetchProfilePosts();
+
+    // Infinite Scroll
+    window.addEventListener('scroll', () => {
+        if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 500) {
+            fetchProfilePosts();
+        }
+    });
 
     // --- FUNGSI LIKE ---
-        async function handleLike(postId) {
-            const btnElement = document.getElementById(`like-btn-${postId}`);
-            const countElement = document.getElementById(`like-count-${postId}`);
+    async function handleLike(postId) {
+        const btnElement = document.getElementById(`like-btn-${postId}`);
+        const countElement = document.getElementById(`like-count-${postId}`);
+        
+        try {
+            const response = await fetch(`/posts/${postId}/like`, {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+            });
+            const result = await response.json();
             
-            try {
-                const response = await fetch(`/posts/${postId}/like`, {
-                    method: 'POST',
-                    headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
-                });
-                const result = await response.json();
-                
-                let currentCount = parseInt(countElement.innerText);
+            let currentCount = parseInt(countElement.innerText);
 
-                if (result.status === 'liked') {
-                    btnElement.classList.remove('text-slate-600', 'hover:text-red-500');
-                    btnElement.classList.add('text-red-500');
-                    countElement.innerText = currentCount + 1;
-                    globalPostsData[postId].is_liked = true;
-                } else {
-                    btnElement.classList.remove('text-red-500');
-                    btnElement.classList.add('text-slate-600', 'hover:text-red-500');
-                    countElement.innerText = currentCount - 1;
-                    globalPostsData[postId].is_liked = false;
-                }
-            } catch (error) {
-                console.error("Gagal melakukan like:", error);
+            if (result.status === 'liked') {
+                btnElement.classList.remove('text-slate-600', 'hover:text-red-500');
+                btnElement.classList.add('text-red-500');
+                countElement.innerText = currentCount + 1;
+                globalPostsData[postId].is_liked = true;
+            } else {
+                btnElement.classList.remove('text-red-500');
+                btnElement.classList.add('text-slate-600', 'hover:text-red-500');
+                countElement.innerText = currentCount - 1;
+                globalPostsData[postId].is_liked = false;
             }
+        } catch (error) {
+            console.error("Gagal melakukan like:", error);
         }
+    }
 
+    // --- FUNGSI KOMENTAR & FOLLOW ---
+    // (Sama persis kayak sebelumnya, biar gak kepanjangan gue ringkas. 
+    // Tapi karena lu copy-paste dari atas, fungsi openCommentModal, appendCommentToUI, 
+    // setReply, cancelReply, commentForm.addEventListener, dan handleFollow udah nempel di bawah ini ya!)
         // --- FUNGSI KOMENTAR FLOATING MODAL ---
         function openCommentModal(postId) {
             currentActivePostId = postId;

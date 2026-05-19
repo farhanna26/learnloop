@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
 {
-    protected $fillable = ['user_id', 'content', 'image'];
+    // Kita tambahkan 'type' dan 'category_id' ke fillable
+    protected $fillable = ['user_id', 'content', 'image', 'type', 'category_id'];
 
     
     // 1. Hubungan ke User (Pembuat Postingan)
@@ -25,5 +26,11 @@ class Post extends Model
     public function comments()
     {
         return $this->hasMany(Comment::class);
+    }
+
+    // 4. Hubungan ke Category (Agar bisa load nama kategori)
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 }
