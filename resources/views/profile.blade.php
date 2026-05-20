@@ -133,7 +133,15 @@
                     </div>
 
                     <div class="px-6 mt-3 pb-8">
-                        <h1 class="text-2xl font-extrabold text-slate-900">{{ $user->name }}</h1>
+                        <div class="flex items-center gap-3">
+                            <h1 class="text-2xl font-extrabold text-slate-900">{{ $user->name }}</h1>
+                            
+                            @if($user->role === 'creator')
+                                <span class="bg-violet-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm shadow-violet-200">Creator</span>
+                            @else
+                                <span class="bg-slate-200 text-slate-600 text-xs font-bold px-3 py-1 rounded-full shadow-sm">Learner</span>
+                            @endif
+                        </div>
                         <p class="text-sm font-medium text-slate-500">{{ $user->email }}</p>
                         
                         <div class="mt-4 text-sm text-slate-800 leading-relaxed">
@@ -295,6 +303,14 @@
         const userName = post.user?.name || 'User';
         const filePath = post.image ? `/storage/${post.image}` : null; 
 
+        // Bikin Pill Badge buat Postingan
+        let roleBadge = '';
+        if (post.user?.role === 'creator') {
+            roleBadge = `<span class="bg-violet-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full ml-2 align-middle shadow-sm">Creator</span>`;
+        } else {
+            roleBadge = `<span class="bg-slate-200 text-slate-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full ml-2 align-middle shadow-sm">Learner</span>`;
+        }
+
         const userPhoto = post.user?.photo 
             ? `/${post.user.photo}` 
             : `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=7c3aed&color=ffffff&rounded=true`;
@@ -310,8 +326,8 @@
                 <img src="${userPhoto}" class="h-11 w-11 rounded-full ring-2 ring-violet-50" />
                 <div>
                     <div class="flex items-center gap-2">
-                        <p class="text-sm font-bold text-slate-900 group-hover:text-violet-600 group-hover:underline transition-colors">${userName}</p>
-                        ${post.type === 'learning' && post.category ? `<span class="bg-violet-100 text-violet-700 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">${post.category.name}</span>` : ''}
+                        <p class="text-sm font-bold text-slate-900 group-hover:text-violet-600 group-hover:underline transition-colors">${userName} ${roleBadge}</p>
+                        ${post.type === 'learning' && post.category ? `<span class="bg-violet-100 text-violet-700 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ml-1">${post.category.name}</span>` : ''}
                     </div>
                     <p class="text-[11px] text-slate-400 uppercase font-medium">${formatTimeAgo(post.created_at)}</p>
                 </div>
@@ -422,10 +438,6 @@
         }
     }
 
-    // --- FUNGSI KOMENTAR & FOLLOW ---
-    // (Sama persis kayak sebelumnya, biar gak kepanjangan gue ringkas. 
-    // Tapi karena lu copy-paste dari atas, fungsi openCommentModal, appendCommentToUI, 
-    // setReply, cancelReply, commentForm.addEventListener, dan handleFollow udah nempel di bawah ini ya!)
         // --- FUNGSI KOMENTAR FLOATING MODAL ---
         function openCommentModal(postId) {
             currentActivePostId = postId;
@@ -459,34 +471,40 @@
         });
 
         function appendCommentToUI(comment, isReply = false) {
-            console.log("CEK DATA KOMENTAR:", comment);
-            const userName = comment.user?.name || 'User';
+        console.log("CEK DATA KOMENTAR:", comment);
+        const userName = comment.user?.name || 'User';
 
-           // --- TAMBAHAN BARU: Cek foto profil si pengomen ---
-            const commenterPhoto = comment.user?.photo 
-                ? `${window.location.origin}/${comment.user.photo}` 
-                : `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=e2e8f0&color=475569`;
-
-            const noDataHtml = commentsList.querySelector('p.text-slate-400');
-            if (noDataHtml) noDataHtml.remove();
-
-            const commentDiv = document.createElement('div');
-            // Kalau isReply = true, kasih margin kiri biar menjorok
-            commentDiv.className = `flex gap-3 ${isReply ? 'ml-10 mt-2' : 'mt-5'}`;
-    
-            commentDiv.innerHTML = `
-                <img src="${commenterPhoto}" class="h-8 w-8 rounded-full shrink-0">
-                <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm flex-1">
-                    <div class="flex justify-between items-center mb-0.5">
-                        <p class="text-[11px] font-bold text-slate-500">${userName}</p>
-                        ${!isReply ? `<button onclick="setReply(${comment.id}, '${userName}')" class="text-[10px] text-violet-500 hover:underline">Balas</button>` : ''}
-                    </div>
-                    <p class="text-sm text-slate-800">${comment.body}</p>
-                </div>
-            `;
-            commentsList.appendChild(commentDiv);
-            commentsList.scrollTop = commentsList.scrollHeight; 
+        // Bikin Pill Badge buat Komentar (Pake var 'comment', bukan 'post')
+        let roleBadgeComment = '';
+        if (comment.user?.role === 'creator') {
+            roleBadgeComment = `<span class="bg-violet-600 text-white text-[8px] font-bold px-2 py-0.5 rounded-full ml-1.5 align-middle shadow-sm">Creator</span>`;
+        } else {
+            roleBadgeComment = `<span class="bg-slate-200 text-slate-600 text-[8px] font-bold px-2 py-0.5 rounded-full ml-1.5 align-middle shadow-sm">Learner</span>`;
         }
+
+        const commenterPhoto = comment.user?.photo 
+            ? `${window.location.origin}/${comment.user.photo}` 
+            : `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=e2e8f0&color=475569`;
+
+        const noDataHtml = commentsList.querySelector('p.text-slate-400');
+        if (noDataHtml) noDataHtml.remove();
+
+        const commentDiv = document.createElement('div');
+        commentDiv.className = `flex gap-3 ${isReply ? 'ml-10 mt-2' : 'mt-5'}`;
+        
+        commentDiv.innerHTML = `
+            <img src="${commenterPhoto}" class="h-8 w-8 rounded-full shrink-0">
+            <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm flex-1">
+                <div class="flex justify-between items-center mb-0.5">
+                    <p class="text-[11px] font-bold text-slate-500">${userName} ${roleBadgeComment}</p>
+                    ${!isReply ? `<button onclick="setReply(${comment.id}, '${userName}')" class="text-[10px] text-violet-500 hover:underline">Balas</button>` : ''}
+                </div>
+                <p class="text-sm text-slate-800">${comment.body}</p>
+            </div>
+        `;
+        commentsList.appendChild(commentDiv);
+        commentsList.scrollTop = commentsList.scrollHeight; 
+    }
 
         // Tambahin dua fungsi ini tepat di bawahnya
         function setReply(commentId, name) {

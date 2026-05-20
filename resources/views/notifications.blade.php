@@ -87,7 +87,7 @@
                 </div>
             </aside>
 
-            <section class="lg:col-span-6 space-y-6">
+            <section class="lg:col-span-8 max-w-4xl space-y-6">
                 <div class="relative overflow-hidden rounded-[32px] bg-white border border-slate-200 p-8 shadow-sm">
                     <h1 class="text-2xl font-extrabold text-slate-900">Pusat Notifikasi 🔔</h1>
                     <p class="text-sm text-slate-500 mt-1">Lihat siapa saja yang berinteraksi dengan karyamu.</p>
@@ -101,13 +101,16 @@
                                      class="h-12 w-12 rounded-full object-cover ring-2 ring-slate-50" />
                                 
                                 <div class="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white 
-                                    {{ $notification->type == 'follow' ? 'bg-violet-600' : ($notification->type == 'like' ? 'bg-rose-500' : ($notification->type == 'comment' ? 'bg-blue-500' : 'bg-slate-800')) }}">
+                                    {{ $notification->type == 'follow' ? 'bg-violet-600' : ($notification->type == 'like' ? 'bg-rose-500' : ($notification->type == 'comment' ? 'bg-blue-500' : (in_array($notification->type, ['new_assignment', 'submit_assignment']) ? 'bg-emerald-500' : 'bg-slate-800'))) }}">
+                                    
                                     @if($notification->type == 'follow')
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                                     @elseif($notification->type == 'like')
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>
                                     @elseif($notification->type == 'comment')
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                                    @elseif(in_array($notification->type, ['new_assignment', 'submit_assignment']))
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                                     @endif
                                 </div>
                             </div>
@@ -123,10 +126,17 @@
                                         mengomentari postingan Anda.
                                     @elseif($notification->type == 'group_invite')
                                         mengundang mu bergabung ke grup diskusi.
+                                    @elseif($notification->type == 'new_assignment')
+                                        ada tugas baru: <span class="font-bold text-emerald-600">{{ $notification->reference?->title ?? 'Tugas Baru' }}</span>
+                                    @elseif($notification->type == 'submit_assignment')
+                                        mengumpulkan jawaban untuk tugas: <span class="font-bold text-emerald-600">{{ $notification->reference?->title ?? 'Tugas' }}</span>
                                     @endif
                                 </p>
                                 <p class="text-[10px] font-bold text-slate-400 mt-0.5 uppercase tracking-wider">{{ $notification->created_at->diffForHumans() }}</p>
                             </div>
+
+                            <div class="flex-1">
+                                </div>
 
                             <div>
                                 @if($notification->type == 'follow')
@@ -148,6 +158,18 @@
                                             <button type="submit" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-bold hover:bg-slate-200 transition shadow-sm">Tolak</button>
                                         </form>
                                     </div>
+                                @elseif($notification->type == 'new_assignment')
+                                    <a href="/chat/{{ $notification->reference?->room_id }}" 
+                                        onclick="sessionStorage.setItem('openTab', 'tugas')"
+                                        class="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-bold hover:bg-emerald-600 hover:text-white transition shadow-sm">
+                                        Lihat Tugas
+                                    </a>
+                                @elseif($notification->type == 'submit_assignment')
+                                    <a href="/chat/{{ $notification->reference?->room_id }}" 
+                                        onclick="sessionStorage.setItem('openTab', 'tugas')"
+                                        class="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-bold hover:bg-emerald-600 hover:text-white transition shadow-sm">
+                                        Periksa
+                                    </a>
                                 @endif
                             </div>
                         </div>
@@ -162,7 +184,6 @@
                 </div>
             </section>
 
-            <aside class="hidden lg:col-span-3 lg:block"></aside>
         </div>
     </main>
 
