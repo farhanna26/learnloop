@@ -20,4 +20,9 @@ class Notification extends Model
     {
         return $this->belongsTo(User::class, 'sender_id');
     }
+
+    public function reference()
+    {
+        return $this->belongsTo(\App\Models\Assignment::class, 'reference_id');
+    }
 }

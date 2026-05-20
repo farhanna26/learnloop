@@ -22,4 +22,10 @@ class Room extends Model
     {
         return $this->hasMany(Message::class);
     }
+
+    // Tambahin relasi ini di bawah relasi yang udah ada
+    public function assignments()
+    {
+        return $this->hasMany(Assignment::class);
+    }
 }

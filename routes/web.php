@@ -42,6 +42,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/posts/{id}/comment', [PostController::class, 'storeComment']);
     Route::post('/posts/{id}/like', [PostController::class, 'toggleLike']);
     Route::get('/api/posts/{id}', [PostController::class, 'show']);
+    Route::post('/assignments', [App\Http\Controllers\ChatController::class, 'storeAssignment']);
+    Route::post('/submissions', [App\Http\Controllers\ChatController::class, 'storeSubmission']);
+    Route::post('/submissions/{id}/grade', [App\Http\Controllers\ChatController::class, 'gradeSubmission']);
 
     // 3. === RUTE CHAT ===
     Route::get('/chat/private/{targetUserId}', [ChatController::class, 'createOrFindPrivateChat']);
