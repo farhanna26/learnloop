@@ -11,7 +11,17 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 // KITA GABUNGIN: Fillable standar lu + data profil buatan Aya
-#[Fillable(['name', 'email', 'password', 'description', 'photo', 'location', 'linkedin', 'gmail'])]
+#[Fillable([
+    'name',
+    'email',
+    'password',
+    'description',
+    'photo',
+    'location',
+    'linkedin',
+    'gmail',
+    'role'
+])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {

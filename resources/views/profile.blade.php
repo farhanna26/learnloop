@@ -133,7 +133,21 @@
                     </div>
 
                     <div class="px-6 mt-3 pb-8">
-                        <h1 class="text-2xl font-extrabold text-slate-900">{{ $user->name }}</h1>
+                        <div class="flex items-center gap-3 flex-wrap">
+    <h1 class="text-2xl font-extrabold text-slate-900">
+        {{ $user->name }}
+    </h1>
+
+    @if($user->role == 'creator')
+        <span class="px-3 py-1 text-xs font-bold rounded-full bg-violet-100 text-violet-700 border border-violet-200 flex items-center gap-1">
+            ✨ Creator
+        </span>
+    @elseif($user->role == 'learner')
+        <span class="px-3 py-1 text-xs font-bold rounded-full bg-sky-100 text-sky-700 border border-sky-200 flex items-center gap-1">
+            📘 Learner
+        </span>
+    @endif
+</div>
                         <p class="text-sm font-medium text-slate-500">{{ $user->email }}</p>
                         
                         <div class="mt-4 text-sm text-slate-800 leading-relaxed">
