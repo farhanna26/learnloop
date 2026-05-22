@@ -58,6 +58,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/chat/group/{roomId}/info', [ChatController::class, 'groupInfo'])->name('chat.group.info');
     Route::post('/chat/group/{roomId}/update', [ChatController::class, 'updateGroup'])->name('chat.group.update');
     Route::post('/chat/group/{roomId}/invite', [ChatController::class, 'inviteToGroup'])->name('chat.group.invite');
+    Route::post('/chat/group/{id}/update', [App\Http\Controllers\ChatController::class, 'updateGroup'])->name('chat.group.update');
 
     // 4. === RUTE PROFIL ===
     
@@ -83,7 +84,10 @@ Route::middleware('auth')->group(function () {
     // --- TAMBAHIN RUTE INI BUAT TOMBOL FOLLOW ---
     Route::post('/profile/{id}/follow', [UserController::class, 'toggleFollow']);
 
-    // Rute Notifikasi
+    // 5. Rute Notifikasi
     Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
     
+    // 6. RUTE LEADERBOARD
+    Route::get('/leaderboard', [App\Http\Controllers\LeaderboardController::class, 'index']);
+    Route::get('/leaderboard/data', [App\Http\Controllers\LeaderboardController::class, 'getData']);
 });

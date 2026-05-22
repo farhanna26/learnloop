@@ -23,7 +23,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
                 </a>
                 <div>
-                    <h1 class="text-xl font-extrabold text-slate-900">Info Grup</h1>
+                    <h1 class="text-xl font-extrabold text-slate-900">{{ $room->type === 'classroom' ? 'Info Kelas' : 'Info Grup' }}</h1>
                     <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">{{ $room->users->count() }} Anggota</p>
                 </div>
             </div>
@@ -32,7 +32,7 @@
         <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-10">
             
             <div>
-                <h2 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider mb-6">Pengaturan Grup</h2>
+                <h2 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider mb-6">Pengaturan {{ $room->type === 'classroom' ? 'Kelas' : 'Grup' }}</h2>
                 
                 @if(session('success'))
                     <div class="mb-6 p-4 bg-emerald-50 text-emerald-600 text-sm font-bold rounded-2xl border border-emerald-100">
@@ -58,12 +58,12 @@
 
                     <div class="space-y-4">
                         <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase ml-1">Nama Grup</label>
+                            <label class="text-xs font-bold text-slate-500 uppercase ml-1">Nama {{ $room->type === 'classroom' ? 'Kelas' : 'Grup' }}</label>
                             <input type="text" name="name" value="{{ $room->name }}" class="w-full mt-1 bg-slate-50 border border-slate-200 focus:bg-white focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 rounded-2xl px-4 py-3 text-sm font-bold outline-none transition-all" required>
                         </div>
                         <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase ml-1">Deskripsi Grup</label>
-                            <textarea name="description" rows="3" class="w-full mt-1 bg-slate-50 border border-slate-200 focus:bg-white focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 rounded-2xl px-4 py-3 text-sm outline-none transition-all" placeholder="Misal: Grup khusus ngebahas tugas Web...">{{ $room->description }}</textarea>
+                            <label class="text-xs font-bold text-slate-500 uppercase ml-1">Deskripsi {{ $room->type === 'classroom' ? 'Kelas' : 'Grup' }}</label>
+                            <textarea name="description" rows="3" class="w-full mt-1 bg-slate-50 border border-slate-200 focus:bg-white focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 rounded-2xl px-4 py-3 text-sm outline-none transition-all" placeholder="Misal: Grup khusus ngebahas materi...">{{ $room->description }}</textarea>
                         </div>
                     </div>
 

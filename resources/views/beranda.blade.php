@@ -59,43 +59,47 @@
             <aside class="hidden lg:col-span-3 lg:block">
                 <div class="sticky top-28 space-y-4">
                     <nav class="space-y-1">
-                        <a href="/beranda" class="group flex items-center gap-3 rounded-2xl bg-violet-50 px-4 py-3 text-sm font-bold text-violet-700 transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                        <a href="/beranda" class="group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm transition-all {{ request()->is('beranda*') ? 'bg-violet-50 text-violet-700 font-bold' : 'text-slate-600 font-medium hover:bg-slate-100 hover:text-slate-900' }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {{ request()->is('beranda*') ? 'opacity-100' : 'opacity-70 group-hover:opacity-100' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                             Beranda
                         </a>
-                        <a href="/contacts" class="group flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">
+
+                        <a href="/contacts" class="group flex items-center justify-between rounded-2xl px-4 py-3 text-sm transition-all {{ request()->is('contacts*') || request()->is('chat*') ? 'bg-violet-50 text-violet-700 font-bold' : 'text-slate-600 font-medium hover:bg-slate-100 hover:text-slate-900' }}">
                             <div class="flex items-center gap-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {{ request()->is('contacts*') || request()->is('chat*') ? 'opacity-100' : 'opacity-70 group-hover:opacity-100' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                                 Pesan
                             </div>
                         </a>
-                        <a href="/search" class="group flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">
-                            <div class="flex items-center gap-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                                Search
-                            </div>
+
+                        <a href="/search" class="group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm transition-all {{ request()->is('search*') ? 'bg-violet-50 text-violet-700 font-bold' : 'text-slate-600 font-medium hover:bg-slate-100 hover:text-slate-900' }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {{ request()->is('search*') ? 'opacity-100' : 'opacity-70 group-hover:opacity-100' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                            Search
                         </a>
-                        <a href="/notifications" class="group flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900 {{ request()->is('notifications') ? 'bg-violet-50 text-violet-700 font-bold' : '' }}">
+
+                        <a href="/notifications" class="group flex items-center justify-between rounded-2xl px-4 py-3 text-sm transition-all {{ request()->is('notifications*') ? 'bg-violet-50 text-violet-700 font-bold' : 'text-slate-600 font-medium hover:bg-slate-100 hover:text-slate-900' }}">
                             <div class="flex items-center gap-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {{ request()->is('notifications*') ? 'opacity-100' : 'opacity-70 group-hover:opacity-100' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                                 </svg>
                                 Notifikasi
                             </div>
-                            
-                            @php $unreadCount = auth()->user()->notifications()->where('is_read', false)->count(); @endphp
+                            @php $unreadCount = auth()->user()->unreadNotificationsCount(); @endphp
                             @if($unreadCount > 0)
-                                <span class="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
+                                <span class="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white font-bold shadow-sm">
                                     {{ $unreadCount }}
                                 </span>
                             @endif
                         </a>
-                        <a href="/profile" class="group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+
+                        <a href="/leaderboard" class="group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm transition-all {{ request()->is('leaderboard*') ? 'bg-violet-50 text-violet-700 font-bold' : 'text-slate-600 font-medium hover:bg-slate-100 hover:text-slate-900' }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {{ request()->is('leaderboard*') ? 'opacity-100' : 'opacity-70 group-hover:opacity-100' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                             </svg>
+                            Leaderboard
+                        </a>
+
+                        <a href="/profile" class="group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm transition-all {{ request()->is('profile*') ? 'bg-violet-50 text-violet-700 font-bold' : 'text-slate-600 font-medium hover:bg-slate-100 hover:text-slate-900' }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {{ request()->is('profile*') ? 'opacity-100' : 'opacity-70 group-hover:opacity-100' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                             Profil
                         </a>
                     </nav>
@@ -227,6 +231,17 @@
                     <input type="file" id="learningFile" class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 transition-colors cursor-pointer" accept="image/*,video/*,.pdf" required>
                 </div>
 
+                <div class="mb-6 p-4 border border-violet-100 bg-violet-50 rounded-2xl">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" id="checkBuatKelas" name="create_class" value="true" class="w-5 h-5 text-violet-600 rounded focus:ring-violet-500" onchange="document.getElementById('areaNamaKelas').classList.toggle('hidden')">
+                        <span class="text-sm font-bold text-violet-900">Sekaligus buat Ruang Kelas Pembelajaran?</span>
+                    </label>
+                    <div id="areaNamaKelas" class="hidden mt-3 pt-3 border-t border-violet-100">
+                        <label class="text-xs font-bold text-violet-700 mb-1 block">Nama Kelas</label>
+                        <input type="text" id="inputClassName" name="class_name" placeholder="Misal: Masterclass Laravel Basic..." class="w-full bg-white border border-violet-200 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 rounded-xl px-4 py-2.5 text-sm outline-none transition-all">
+                    </div>
+                </div>
+
                 <button type="submit" id="btnSubmitLearning" class="w-full rounded-2xl bg-violet-600 py-4 text-sm font-bold text-white hover:bg-violet-700 transition-all shadow-lg shadow-violet-200 active:scale-95">Upload Materi Sekarang</button>
             </form>
         </div>
@@ -272,6 +287,7 @@
         const loadingIndicator = document.getElementById('loadingIndicator');
         const noMorePosts = document.getElementById('noMorePosts');
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const currentUserId = {{ Auth::id() }};
 
         // Variabel Komentar Modal
         const commentModal = document.getElementById('commentModal');
@@ -326,19 +342,69 @@
 
             const likeColorClass = post.is_liked ? 'text-red-500' : 'text-slate-600 hover:text-red-500';
 
+            // Logika Banner Gabung Kelas
+            let roomBannerHtml = '';
+            if (post.room_id && post.room) {
+                // Cek apakah user udah gabung kelas ini
+                let isJoined = false;
+                if (post.user_id === currentUserId) {
+                    isJoined = true; // Kalo dia yang upload, pasti dia yang punya kelas
+                } else if (post.room.users) {
+                    // Cek apakah id user ada di daftar member kelas
+                    isJoined = post.room.users.some(u => u.id === currentUserId);
+                }
+
+                // Bikin Tombol Sesuai Status
+                let buttonHtml = '';
+                if (isJoined) {
+                    buttonHtml = `
+                        <a href="/chat/${post.room_id}" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2.5 rounded-xl text-xs font-extrabold transition-all text-center block">
+                            Buka Kelas
+                        </a>
+                    `;
+                } else {
+                    buttonHtml = `
+                        <form action="/chat/join/${post.room_id}" method="POST" class="w-full sm:w-auto shrink-0">
+                            <input type="hidden" name="_token" value="${csrfToken}">
+                            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl text-xs font-extrabold shadow-lg shadow-emerald-200 transition-all active:scale-95">
+                                Gabung Kelas
+                            </button>
+                        </form>
+                    `;
+                }
+
+                roomBannerHtml = `
+                    <div class="mx-5 mb-5 p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="h-10 w-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600 shrink-0 shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 14v6.5" /></svg>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wider mb-0.5">Ruang Kelas Tersedia</p>
+                                <p class="text-sm font-bold text-slate-900 line-clamp-1">${post.room.name}</p>
+                            </div>
+                        </div>
+                        ${buttonHtml}
+                    </div>
+                `;
+            }
+
             article.innerHTML = `
                 <div class="flex items-center gap-3 p-5">
                     <img src="${userPhoto}" class="h-11 w-11 rounded-full ring-2 ring-violet-50" />
                     <div>
                         <div class="flex items-center gap-2">
-                            <p class="text-sm font-bold text-slate-900 group-hover:text-violet-600 group-hover:underline transition-colors">${userName} ${roleBadge}</p>
+                            <p class="text-sm font-bold text-slate-900">${userName} ${roleBadge}</p>
                             ${post.type === 'learning' && post.category ? `<span class="bg-violet-100 text-violet-700 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ml-1">${post.category.name}</span>` : ''}
                         </div>
                         <p class="text-[11px] text-slate-400 uppercase font-medium">${formatTimeAgo(post.created_at)}</p>
                     </div>
                 </div>
+
                 <div class="px-5 pb-4 text-sm text-slate-700 leading-relaxed">${post.content}</div>
-                
+
+                ${roomBannerHtml}
+
                 <div class="mx-5 mb-5 overflow-hidden rounded-2xl bg-slate-100 flex items-center justify-center">
                     ${isImage && filePath ? `<img src="${filePath}" class="w-full h-auto object-cover max-h-[500px]">` : ''}
                     ${isVideo && filePath ? `<video src="${filePath}" controls class="w-full h-auto max-h-[500px] bg-black"></video>` : ''}
@@ -346,9 +412,7 @@
                         <div class="w-full flex items-center justify-between p-6 bg-violet-50 border border-violet-100 rounded-2xl">
                             <div class="flex items-center gap-4">
                                 <div class="h-12 w-12 flex items-center justify-center bg-white rounded-xl shadow-sm text-red-500 font-bold text-[10px]">PDF</div>
-                                <div class="overflow-hidden">
-                                    <p class="text-sm font-bold text-slate-900 truncate max-w-[150px]">Dokumen Materi</p>
-                                </div>
+                                <p class="text-sm font-bold text-slate-900 truncate max-w-[150px]">Dokumen Materi</p>
                             </div>
                             <a href="${filePath}" target="_blank" class="rounded-xl bg-violet-600 px-4 py-2 text-xs font-bold text-white hover:bg-violet-700 shadow-lg shadow-violet-100">Buka File</a>
                         </div>
@@ -649,7 +713,12 @@
             const file = document.getElementById('learningFile').files[0];
             const btn = document.getElementById('btnSubmitLearning');
 
+            // Tangkep isian Checkbox Bikin Kelas
+            const isCreateClass = document.getElementById('checkBuatKelas').checked;
+            const className = document.getElementById('inputClassName').value;
+
             if (!caption || !file || !categoryId) return alert("Semua kolom wajib diisi, beb!");
+            if (isCreateClass && !className) return alert("Nama kelas harus diisi kalau mau bikin kelas!");
 
             btn.innerText = "Mengunggah Materi...";
             btn.disabled = true;
@@ -659,6 +728,12 @@
             formData.append('image', file);
             formData.append('type', 'learning'); // Otomatis nembak tipe learning
             formData.append('category_id', categoryId); // Kirim ID kategori
+
+            // Masukin data kelas kalau dicentang
+            if (isCreateClass) {
+                formData.append('create_class', 'true');
+                formData.append('class_name', className);
+            }
 
             try {
                 const response = await fetch('/posts', {
@@ -672,7 +747,9 @@
                     alert('Materi sukses mendarat!');
                     document.getElementById('learningUploadModal').classList.add('hidden');
                     document.getElementById('learningUploadForm').reset();
-                    // Nanti kita tambahin logika refresh tab Pembelajaran di sini
+                    
+                    // REFRESH TAB PEMBELAJARAN BIAR POSTINGAN BARU LANGSUNG MUNCUL
+                    switchFeedType('learning');
                 }
             } catch (error) {
                 alert("Waduh, upload gagal!");

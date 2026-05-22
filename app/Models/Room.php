@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory; // 👈 INI KTP YANG BIKIN ERROR TADI
+use Illuminate\Database\Eloquent\Factories\HasFactory; // INI KTP YANG BIKIN ERROR TADI
 
 class Room extends Model
 {
@@ -11,13 +11,13 @@ class Room extends Model
 
     protected $fillable = ['name', 'type', 'photo', 'description'];
 
-    // 👈 INI WAJIB ADA BIAR KAMARNYA BISA DIISI BANYAK ORANG
+    // INI WAJIB ADA BIAR KAMARNYA BISA DIISI BANYAK ORANG
     public function users()
     {
-        return $this->belongsToMany(User::class);
+        return $this->belongsToMany(User::class)->withPivot('role')->withTimestamps();
     }
 
-    // 👈 INI WAJIB ADA BIAR KAMARNYA BISA NYIMPEN PESAN
+    // INI WAJIB ADA BIAR KAMARNYA BISA NYIMPEN PESAN
     public function messages()
     {
         return $this->hasMany(Message::class);
