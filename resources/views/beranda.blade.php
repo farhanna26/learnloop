@@ -391,13 +391,15 @@
 
             article.innerHTML = `
                 <div class="flex items-center gap-3 p-5">
-                    <img src="${userPhoto}" class="h-11 w-11 rounded-full ring-2 ring-violet-50" />
+                    <a href="/profile/${post.user?.id}" class="shrink-0 transition-transform hover:scale-105">
+                        <img src="${userPhoto}" class="h-11 w-11 rounded-full ring-2 ring-violet-50" />
+                    </a>
                     <div>
                         <div class="flex items-center gap-2">
                             <p class="text-sm font-bold text-slate-900">${userName} ${roleBadge}</p>
                             ${post.type === 'learning' && post.category ? `<span class="bg-violet-100 text-violet-700 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ml-1">${post.category.name}</span>` : ''}
                         </div>
-                        <p class="text-[11px] text-slate-400 uppercase font-medium">${formatTimeAgo(post.created_at)}</p>
+                        <a href="/profile/${post.user?.id}" class="text-sm font-bold text-slate-900 hover:text-violet-600 hover:underline transition-colors">${userName}</a> ${roleBadge}
                     </div>
                 </div>
 
