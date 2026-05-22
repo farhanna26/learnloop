@@ -38,7 +38,7 @@
                     @endif
 
                     <div>
-                        @if($room->type === 'group')
+                        @if($room->type === 'group' || $room->type === 'classroom')
                             <a href="/chat/group/{{ $room->id }}/info" class="hover:text-violet-600 transition-colors cursor-pointer group">
                                 <h2 class="text-sm font-extrabold text-slate-900 leading-tight group-hover:underline">{{ $chatTitle }}</h2>
                             </a>

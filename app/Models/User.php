@@ -74,4 +74,10 @@ class User extends Authenticatable
                     ->where('is_read', false)
                     ->count();
     }
+
+    // TAMBAHAN BARU: Relasi ke pengumpulan tugas biar bisa dihitung total nilainya
+    public function submissions()
+    {
+        return $this->hasMany(Submission::class);
+    }
 }

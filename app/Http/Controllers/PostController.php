@@ -19,7 +19,7 @@ class PostController extends Controller
         $profileUserId = $request->query('user_id'); 
 
         // 1. Mulai rakit query
-        $query = Post::with(['user', 'comments.user', 'category']) // Bawa data kategori sekalian
+        $query = Post::with(['user', 'comments.user', 'category', 'room', 'room.users']) // Bawa data kategori sekalian
                     ->withCount('likes')
                     ->withCount('comments')
                     ->withExists(['likes as is_liked' => function($q) use ($loginUserId) {
@@ -51,8 +51,10 @@ class PostController extends Controller
         $request->validate([
             'content' => 'required|string',
             'image' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,pdf|max:10240', 
-            'type' => 'nullable|in:portfolio,learning', // Terima tipe postingan
-            'category_id' => 'nullable|exists:categories,id' // Terima ID Kategori
+            'type' => 'nullable|in:portfolio,learning', 
+            'category_id' => 'nullable|exists:categories,id',
+            'create_class' => 'nullable', // Tangkep input checkbox
+            'class_name' => 'nullable|string|max:255' // Tangkep nama kelas
         ]);
 
         $imagePath = null;
@@ -63,15 +65,30 @@ class PostController extends Controller
             $imagePath = $file->storeAs('posts', $filename, 'public');
         }
 
+        $roomId = null; // Default kosong
+
+        // LOGIC BARU: Bikin Ruang Kelas kalau checkbox dicentang
+        if ($request->has('create_class') && $request->create_class !== 'false' && !empty($request->class_name)) {
+            $room = \App\Models\Room::create([
+                'name' => $request->class_name,
+                'type' => 'classroom', // Otomatis jadi tipe kelas
+            ]);
+            // Otomatis jadiin yang upload sebagai Creator kelas
+            $room->users()->attach(auth()->id(), ['role' => 'creator']);
+            $roomId = $room->id;
+        }
+
         $post = Post::create([
             'user_id' => auth()->id(),
             'content' => $request->content,
             'image'   => $imagePath, 
-            'type'    => $request->type ?? 'portfolio', // Kalau kosong, default portfolio
-            'category_id' => $request->category_id
+            'type'    => $request->type ?? 'portfolio', 
+            'category_id' => $request->category_id,
+            'room_id' => $roomId // <-- Tautin postingan ke kelas yang baru dibikin
         ]);
 
-        $post->load('user');
+        // Tambahin 'room' di load biar data kelas kebawa ke Frontend Javascript lu
+        $post->load('user', 'room', 'room.users');
         
         // Kasih default value buat UI
         $post->likes_count = 0;
@@ -81,7 +98,7 @@ class PostController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Postingan Berhasil Dibuat',
+            'message' => 'Postingan & Materi Berhasil Dibuat',
             'data'    => $post
         ], 201);
     }

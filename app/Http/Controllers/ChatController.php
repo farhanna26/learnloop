@@ -239,12 +239,12 @@ class ChatController extends Controller
         return view('group-info', compact('room', 'invitableMutuals'));
     }
 
-    // 9. Update Info Grup
+    // 9. Update Info Grup & Kelas
     public function updateGroup(Request $request, $roomId)
     {
         $room = Room::findOrFail($roomId);
         
-        // Keamanan
+        // Keamanan: Pastiin yang ngedit beneran member di dalemnya
         if (!$room->users->contains(auth()->id())) {
             return back()->with('error', 'Akses ditolak!');
         }
@@ -252,12 +252,13 @@ class ChatController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'photo' => 'image|mimes:jpeg,png,jpg,gif|max:3072'
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:3072'
         ]);
 
         $room->name = $request->name;
         $room->description = $request->description;
 
+        // Logic buat ngurusin upload foto baru
         if ($request->hasFile('photo')) {
             $path = $request->file('photo')->store('group_photos', 'public');
             $room->photo = $path;
@@ -265,7 +266,9 @@ class ChatController extends Controller
 
         $room->save();
 
-        return back()->with('success', 'Info grup berhasil diupdate!');
+        // Biar pesannya dinamis: Kalau diedit di kelas bilangnya "Kelas", kalau di grup bilangnya "Grup"
+        $jenis = $room->type === 'classroom' ? 'Kelas' : 'Grup';
+        return back()->with('success', "Mantap! Info $jenis berhasil diperbarui.");
     }
 
     // 10. Invite Member Tambahan
