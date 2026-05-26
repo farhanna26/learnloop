@@ -242,6 +242,7 @@
     const postsWrapper = document.getElementById('profilePostsWrapper');
     const loadingIndicator = document.getElementById('loadingIndicator');
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const currentUserId = {{ Auth::id() }};
     
     // Modal Komentar
     const commentModal = document.getElementById('commentModal');
@@ -325,19 +326,71 @@
 
         const likeColorClass = post.is_liked ? 'text-red-500' : 'text-slate-600 hover:text-red-500';
 
+        // Logika Banner Gabung Kelas
+        let roomBannerHtml = '';
+        if (post.room_id && post.room) {
+            // Cek apakah user udah gabung kelas ini
+            let isJoined = false;
+            if (post.user_id === currentUserId) {
+                isJoined = true; // Kalo dia yang upload, pasti dia yang punya kelas
+            } else if (post.room.users) {
+                // Cek apakah id user ada di daftar member kelas
+                isJoined = post.room.users.some(u => u.id === currentUserId);
+            }
+
+            // Bikin Tombol Sesuai Status
+            let buttonHtml = '';
+            if (isJoined) {
+                buttonHtml = `
+                    <a href="/chat/${post.room_id}" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2.5 rounded-xl text-xs font-extrabold transition-all text-center block">
+                        Buka Kelas
+                    </a>
+                `;
+            } else {
+                buttonHtml = `
+                    <form action="/chat/join/${post.room_id}" method="POST" class="w-full sm:w-auto shrink-0">
+                        <input type="hidden" name="_token" value="${csrfToken}">
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl text-xs font-extrabold shadow-lg shadow-emerald-200 transition-all active:scale-95">
+                            Gabung Kelas
+                        </button>
+                    </form>
+                `;
+            }
+
+            roomBannerHtml = `
+                <div class="mx-5 mb-5 p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="h-10 w-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600 shrink-0 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 14v6.5" /></svg>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wider mb-0.5">Ruang Kelas Tersedia</p>
+                            <p class="text-sm font-bold text-slate-900 line-clamp-1">${post.room.name}</p>
+                        </div>
+                    </div>
+                    ${buttonHtml}
+                </div>
+            `;
+        }
+
         article.innerHTML = `
             <div class="flex items-center gap-3 p-5">
-                <img src="${userPhoto}" class="h-11 w-11 rounded-full ring-2 ring-violet-50" />
+                <a href="/profile/${post.user?.id}" class="shrink-0 transition-transform hover:scale-105">
+                    <img src="${userPhoto}" class="h-11 w-11 rounded-full ring-2 ring-violet-50" />
+                </a>
                 <div>
                     <div class="flex items-center gap-2">
-                        <p class="text-sm font-bold text-slate-900 group-hover:text-violet-600 group-hover:underline transition-colors">${userName} ${roleBadge}</p>
+                        <a href="/profile/${post.user?.id}" class="text-sm font-bold text-slate-900 hover:text-violet-600 hover:underline transition-colors">${userName}</a> ${roleBadge}
                         ${post.type === 'learning' && post.category ? `<span class="bg-violet-100 text-violet-700 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ml-1">${post.category.name}</span>` : ''}
                     </div>
                     <p class="text-[11px] text-slate-400 uppercase font-medium">${formatTimeAgo(post.created_at)}</p>
                 </div>
             </div>
+
             <div class="px-5 pb-4 text-sm text-slate-700 leading-relaxed">${post.content}</div>
-            
+
+            ${roomBannerHtml}
+
             <div class="mx-5 mb-5 overflow-hidden rounded-2xl bg-slate-100 flex items-center justify-center">
                 ${isImage && filePath ? `<img src="${filePath}" class="w-full h-auto object-cover max-h-[500px]">` : ''}
                 ${isVideo && filePath ? `<video src="${filePath}" controls class="w-full h-auto max-h-[500px] bg-black"></video>` : ''}
