@@ -7,6 +7,7 @@ use App\Models\Comment;
 use App\Models\Like;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -102,6 +103,57 @@ class PostController extends Controller
             'data'    => $post
         ], 201);
     }
+
+    public function update(Request $request, $id)
+{
+    $post = Post::findOrFail($id);
+
+    // Pastikan hanya pemilik post yang bisa edit
+    if ($post->user_id !== Auth::id()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Kamu tidak punya akses untuk mengedit postingan ini.'
+        ], 403);
+    }
+
+    $request->validate([
+        'content' => 'required|string|max:5000',
+    ]);
+
+    $post->content = $request->content;
+    $post->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Postingan berhasil diperbarui.',
+        'data'    => $post
+    ]);
+}
+
+public function destroy($id)
+{
+    $post = Post::findOrFail($id);
+
+    // Pastikan hanya pemilik post yang bisa hapus
+    if ($post->user_id !== Auth::id()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Kamu tidak punya akses untuk menghapus postingan ini.'
+        ], 403);
+    }
+
+    // Hapus file dari storage jika ada
+    if ($post->image) {
+        Storage::disk('public')->delete($post->image);
+    }
+
+    $post->delete();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Postingan berhasil dihapus.'
+    ]);
+}
 
     // Menambah Komentar
     public function storeComment(Request $request, $postId)

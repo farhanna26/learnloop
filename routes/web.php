@@ -45,6 +45,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/assignments', [App\Http\Controllers\ChatController::class, 'storeAssignment']);
     Route::post('/submissions', [App\Http\Controllers\ChatController::class, 'storeSubmission']);
     Route::post('/submissions/{id}/grade', [App\Http\Controllers\ChatController::class, 'gradeSubmission']);
+    Route::put('/posts/{id}', [PostController::class, 'update']);
+    Route::delete('/posts/{id}', [PostController::class, 'destroy']);
 
     // 3. === RUTE CHAT ===
     Route::get('/chat/private/{targetUserId}', [ChatController::class, 'createOrFindPrivateChat']);
