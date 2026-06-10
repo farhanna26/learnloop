@@ -384,6 +384,7 @@
                                 <span>🗑️</span> Hapus
                             </button>
                         </div>
+                        <a href="/profile/${post.user?.id}" class="text-sm font-bold text-slate-900 hover:text-violet-600 hover:underline transition-colors">${userName}</a> ${roleBadge}
                     </div>
                     ` : ''} 
                 </div>
