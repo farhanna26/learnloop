@@ -45,6 +45,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/assignments', [App\Http\Controllers\ChatController::class, 'storeAssignment']);
     Route::post('/submissions', [App\Http\Controllers\ChatController::class, 'storeSubmission']);
     Route::post('/submissions/{id}/grade', [App\Http\Controllers\ChatController::class, 'gradeSubmission']);
+    Route::delete('/posts/{id}', [PostController::class, 'destroy']);
+    Route::put('/posts/{id}', [PostController::class, 'update']);
 
     // 3. === RUTE CHAT ===
     Route::get('/chat/private/{targetUserId}', [ChatController::class, 'createOrFindPrivateChat']);
@@ -59,6 +61,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/chat/group/{roomId}/update', [ChatController::class, 'updateGroup'])->name('chat.group.update');
     Route::post('/chat/group/{roomId}/invite', [ChatController::class, 'inviteToGroup'])->name('chat.group.invite');
     Route::post('/chat/group/{id}/update', [App\Http\Controllers\ChatController::class, 'updateGroup'])->name('chat.group.update');
+
+    // Rute Baru AI Mentor dengan Fitur History
+    Route::get('/ai-mentor', [App\Http\Controllers\AiMentorController::class, 'index']);
+    Route::post('/ai-mentor/ask', [App\Http\Controllers\AiMentorController::class, 'ask']);
+    Route::post('/ai-mentor/pin/{id}', [App\Http\Controllers\AiMentorController::class, 'togglePin']);
+    Route::delete('/ai-mentor/delete/{id}', [App\Http\Controllers\AiMentorController::class, 'deleteChat']);
+
 
     // 4. === RUTE PROFIL ===
     
