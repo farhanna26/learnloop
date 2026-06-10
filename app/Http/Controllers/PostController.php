@@ -14,19 +14,20 @@ class PostController extends Controller
     {
         $offset = $request->query('offset', 0);
         $limit = $request->query('limit', 5);
+        $type = $request->query('type', 'portfolio'); // Nangkap tipe dari JS, default 'portfolio'
         $loginUserId = auth()->id(); 
-        $profileUserId = $request->query('user_id'); // Nangkap ID user dari halaman Profil
+        $profileUserId = $request->query('user_id'); 
 
-        // 1. Mulai rakit query pake kodingan lu yang efisien
-        $query = Post::with(['user', 'comments.user'])
+        // 1. Mulai rakit query
+        $query = Post::with(['user', 'comments.user', 'category', 'room', 'room.users']) // Bawa data kategori sekalian
                     ->withCount('likes')
                     ->withCount('comments')
-                    // Cek apakah user yang login udah nge-like postingan ini
                     ->withExists(['likes as is_liked' => function($q) use ($loginUserId) {
                         $q->where('user_id', $loginUserId);
-                    }]);
+                    }])
+                    ->where('type', $type); // FILTER TIPE POSTINGAN DI SINI!
 
-        // 2. FILTER: Kalau ada 'user_id' yang dikirim dari JS, berarti lagi di halaman Profil
+        // 2. FILTER: Kalau ada 'user_id'
         if ($profileUserId) {
             $query->where('user_id', $profileUserId);
         }
@@ -50,6 +51,10 @@ class PostController extends Controller
         $request->validate([
             'content' => 'required|string',
             'image' => 'nullable|file|mimes:jpeg,jpg,png,gif,mp4,pdf|max:10240', 
+            'type' => 'nullable|in:portfolio,learning', 
+            'category_id' => 'nullable|exists:categories,id',
+            'create_class' => 'nullable', // Tangkep input checkbox
+            'class_name' => 'nullable|string|max:255' // Tangkep nama kelas
         ]);
 
         $imagePath = null;
@@ -60,13 +65,30 @@ class PostController extends Controller
             $imagePath = $file->storeAs('posts', $filename, 'public');
         }
 
+        $roomId = null; // Default kosong
+
+        // LOGIC BARU: Bikin Ruang Kelas kalau checkbox dicentang
+        if ($request->has('create_class') && $request->create_class !== 'false' && !empty($request->class_name)) {
+            $room = \App\Models\Room::create([
+                'name' => $request->class_name,
+                'type' => 'classroom', // Otomatis jadi tipe kelas
+            ]);
+            // Otomatis jadiin yang upload sebagai Creator kelas
+            $room->users()->attach(auth()->id(), ['role' => 'creator']);
+            $roomId = $room->id;
+        }
+
         $post = Post::create([
-            'user_id' => auth()->id(), // AMAN DARI HARDCODE
+            'user_id' => auth()->id(),
             'content' => $request->content,
             'image'   => $imagePath, 
+            'type'    => $request->type ?? 'portfolio', 
+            'category_id' => $request->category_id,
+            'room_id' => $roomId // <-- Tautin postingan ke kelas yang baru dibikin
         ]);
 
-        $post->load('user');
+        // Tambahin 'room' di load biar data kelas kebawa ke Frontend Javascript lu
+        $post->load('user', 'room', 'room.users');
         
         // Kasih default value buat UI
         $post->likes_count = 0;
@@ -76,7 +98,7 @@ class PostController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Postingan Berhasil Dibuat',
+            'message' => 'Postingan & Materi Berhasil Dibuat',
             'data'    => $post
         ], 201);
     }
@@ -86,17 +108,30 @@ class PostController extends Controller
     {
         $request->validate([
             'body' => 'required|string',
-            'parent_id' => 'nullable|exists:comments,id' // Validasi parent_id kalau ada
+            'parent_id' => 'nullable|exists:comments,id' 
         ]);
 
         $comment = Comment::create([
             'user_id' => auth()->id(),
             'post_id' => $postId,
-            'parent_id' => $request->parent_id, // Masukin parent_id-nya
+            'parent_id' => $request->parent_id,
             'body'    => $request->body
         ]);
 
         $comment->load('user');
+
+        // --- LOGIKA NOTIFIKASI KOMENTAR ---
+        $post = Post::findOrFail($postId);
+        // Jangan kirim notif kalau ngomen postingan sendiri
+        if ($post->user_id !== auth()->id()) {
+            \App\Models\Notification::create([
+                'user_id' => $post->user_id,      // Pemilik Postingan
+                'sender_id' => auth()->id(),      // Yang Komen
+                'type' => 'comment',
+                'reference_id' => $post->id,      // ID Postingan
+                'is_read' => false
+            ]);
+        }
 
         return response()->json([
             'success' => true,
@@ -108,7 +143,7 @@ class PostController extends Controller
     // Sistem Toggle Like (Like/Unlike)
     public function toggleLike($postId)
     {
-        $userId = auth()->id(); // AMAN DARI HARDCODE
+        $userId = auth()->id(); 
         $existingLike = Like::where('user_id', $userId)->where('post_id', $postId)->first();
 
         if ($existingLike) {
@@ -121,6 +156,77 @@ class PostController extends Controller
             'post_id' => $postId
         ]);
 
+        // --- LOGIKA NOTIFIKASI LIKE ---
+        $post = Post::findOrFail($postId);
+        if ($post->user_id !== $userId) {
+            \App\Models\Notification::create([
+                'user_id' => $post->user_id,
+                'sender_id' => $userId,
+                'type' => 'like',
+                'reference_id' => $post->id,
+                'is_read' => false
+            ]);
+        }
+
         return response()->json(['status' => 'liked', 'message' => 'Like berhasil'], 201);
+    }
+
+    // Mengambil 1 detail postingan beserta komentar (Untuk Modal Notifikasi)
+    public function show($id)
+    {
+        try {
+            // Kita tarik data Postingan, sekalian bawa data User pembuatnya dan data Komentar+Usernya
+            $post = Post::with(['user', 'comments.user'])->findOrFail($id);
+
+            return response()->json([
+                'success' => true,
+                'data'    => $post
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Postingan tidak ditemukan'
+            ], 404);
+        }
+    }
+
+    public function destroy($id)
+    {
+        $post = \App\Models\Post::findOrFail($id);
+
+        // Keamanan lapis dewa: Pastiin yang ngehapus beneran yang bikin post!
+        if ($post->user_id !== auth()->id()) {
+            return response()->json(['success' => false, 'message' => 'Ngapain lu hapus post orang, beb!'], 403);
+        }
+
+        // Kalau ada file (gambar/video/pdf), hapus juga dari storage biar memori server lu gak bengkak
+        if ($post->image) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($post->image);
+        }
+
+        // Hapus dari database
+        $post->delete();
+
+        return response()->json(['success' => true]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'content' => 'required|string'
+        ]);
+
+        $post = \App\Models\Post::findOrFail($id);
+
+        // Keamanan lapis baja: Mencegah attacker ngedit post orang lain pake Postman/Inspect Element
+        if ($post->user_id !== auth()->id()) {
+            return response()->json(['success' => false, 'message' => 'Heh, mau ngedit postingan orang lu ya?!'], 403);
+        }
+
+        // Timpa caption lama pake yang baru
+        $post->content = $request->content;
+        $post->save();
+
+        return response()->json(['success' => true]);
     }
 }

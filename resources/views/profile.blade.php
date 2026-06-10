@@ -38,52 +38,7 @@
 
     <main class="mx-auto max-w-7xl px-4 py-8 pb-24 sm:px-6">
         <div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
-            
-            <aside class="hidden lg:col-span-3 lg:block">
-                <div class="sticky top-28 space-y-4">
-                    <nav class="space-y-1">
-                        <a href="/beranda" class="group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                            Beranda
-                        </a>
-                        <a href="/contacts" class="group flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">
-                            <div class="flex items-center gap-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                                Pesan
-                            </div>
-                        </a>
-                        <a href="/search" class="group flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">
-                            <div class="flex items-center gap-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                                Search
-                            </div>
-                        </a>
-                        <a href="/notifications" class="group flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900 {{ request()->is('notifications') ? 'bg-violet-50 text-violet-700 font-bold' : '' }}">
-                            <div class="flex items-center gap-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                </svg>
-                                Notifikasi
-                            </div>
-                            
-                            @php $unreadCount = auth()->user()->notifications()->where('is_read', false)->count(); @endphp
-                            @if($unreadCount > 0)
-                                <span class="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
-                                    {{ $unreadCount }}
-                                </span>
-                            @endif
-                        </a>
-                        <a href="/profile" class="group flex items-center gap-3 rounded-2xl bg-violet-50 px-4 py-3 text-sm font-bold text-violet-700 transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                            Profil
-                        </a>
-                    </nav>
-                </div>
-            </aside>
+            @include('components.sidebar')
 
             <section class="lg:col-span-6 space-y-6">
                 
@@ -133,21 +88,15 @@
                     </div>
 
                     <div class="px-6 mt-3 pb-8">
-                        <div class="flex items-center gap-3 flex-wrap">
-    <h1 class="text-2xl font-extrabold text-slate-900">
-        {{ $user->name }}
-    </h1>
-
-    @if($user->role == 'creator')
-        <span class="px-3 py-1 text-xs font-bold rounded-full bg-violet-100 text-violet-700 border border-violet-200 flex items-center gap-1">
-            ✨ Creator
-        </span>
-    @elseif($user->role == 'learner')
-        <span class="px-3 py-1 text-xs font-bold rounded-full bg-sky-100 text-sky-700 border border-sky-200 flex items-center gap-1">
-            📘 Learner
-        </span>
-    @endif
-</div>
+                        <div class="flex items-center gap-3">
+                            <h1 class="text-2xl font-extrabold text-slate-900">{{ $user->name }}</h1>
+                            
+                            @if($user->role === 'creator')
+                                <span class="bg-violet-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm shadow-violet-200">Creator</span>
+                            @else
+                                <span class="bg-slate-200 text-slate-600 text-xs font-bold px-3 py-1 rounded-full shadow-sm">Learner</span>
+                            @endif
+                        </div>
                         <p class="text-sm font-medium text-slate-500">{{ $user->email }}</p>
                         
                         <div class="mt-4 text-sm text-slate-800 leading-relaxed">
@@ -179,20 +128,30 @@
                                 Bergabung {{ $user->created_at->format('M Y') }}
                             </div>
                         </div>
+                    </div> <div class="flex border-t border-slate-100 mt-4">
+                        <button id="tab-portfolio" onclick="switchProfileTab('portfolio')" class="flex-1 py-4 text-sm font-bold text-slate-900 border-b-4 border-violet-600 hover:bg-slate-50 transition-colors">
+                            Portofolio
+                        </button>
+                        <button id="tab-learning" onclick="switchProfileTab('learning')" class="flex-1 py-4 text-sm font-bold text-slate-500 border-b-4 border-transparent hover:bg-slate-50 hover:text-slate-900 transition-colors">
+                            Pembelajaran
+                        </button>
                     </div>
+                    
                 </div>
 
-                <div id="postsWrapper" class="space-y-6">
-                    <div class="text-center py-10 bg-white rounded-[32px] border border-slate-200">
-                        <p class="text-slate-500 font-medium">Postingan lu bakal muncul di sini.</p>
+                <div id="profilePostsWrapper" class="space-y-6"></div>
+
+                <div id="loadingIndicator" class="hidden text-center py-6">
+                    <div class="inline-block animate-spin text-violet-600">
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
                     </div>
                 </div>
 
             </section>
 
-            <aside class="hidden lg:col-span-3 lg:block">
-                </aside>
-            
+            @include('components.right-sidebar')
         </div>
     </main>
 
@@ -224,25 +183,74 @@
           </div>
       </div>
 
+    <div id="editPostModal" class="fixed inset-0 z-[80] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all">
+        <div class="w-full max-w-lg rounded-[32px] bg-white p-8 shadow-2xl transform transition-all scale-95 opacity-0 duration-200" id="editModalContent">
+            <h3 class="text-xl font-bold mb-6 text-slate-900">Edit Caption Postingan</h3>
+            
+            <input type="hidden" id="editPostId">
+            
+            <textarea id="editCaptionText" rows="4" class="w-full rounded-2xl border border-slate-200 p-4 text-sm outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all bg-slate-50 custom-scrollbar" placeholder="Tulis ulang caption lu di sini..."></textarea>
+            
+            <div class="mt-6 flex gap-3">
+                <button onclick="closeEditModal()" class="w-full rounded-2xl bg-slate-100 py-3.5 text-sm font-bold text-slate-600 hover:bg-slate-200 transition-all">Batal</button>
+                <button onclick="saveEditPost()" id="btnSaveEdit" class="w-full rounded-2xl bg-violet-600 py-3.5 text-sm font-bold text-white hover:bg-violet-700 transition-all shadow-lg shadow-violet-200 active:scale-95">Simpan Perubahan</button>
+            </div>
+        </div>
+    </div>
     <script>
     // Ambil ID user yang lagi dilihat profilnya
     const profileUserId = "{{ $user->id }}"; 
     
-    const postsWrapper = document.getElementById('postsWrapper');
+    // Variabel Global
+    const postsWrapper = document.getElementById('profilePostsWrapper');
+    const loadingIndicator = document.getElementById('loadingIndicator');
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const currentUserId = {{ Auth::id() }};
+    
+    // Modal Komentar
     const commentModal = document.getElementById('commentModal');
     const closeCommentModal = document.getElementById('closeCommentModal');
     const commentsList = document.getElementById('commentsList');
     const commentForm = document.getElementById('commentForm');
     const commentInput = document.getElementById('commentInput');
+    
     let currentActivePostId = null; 
     let globalPostsData = {}; 
     let currentParentId = null;
 
+    // Variabel Fetch Data
+    let currentTab = 'portfolio';
     let currentOffset = 0;
     let isLoading = false;
-    let allPostsLoaded = false;
+    let allLoaded = false;
 
+    // --- FUNGSI GANTI TAB ---
+    function switchProfileTab(type) {
+        currentTab = type;
+        const btnPorto = document.getElementById('tab-portfolio');
+        const btnLearn = document.getElementById('tab-learning');
+
+        // Class buat tab yang AKTIF (Teks item, garis bawah ungu)
+        const activeClass = "flex-1 py-4 text-sm font-bold text-slate-900 border-b-4 border-violet-600 hover:bg-slate-50 transition-colors";
+        // Class buat tab yang TIDAK AKTIF (Teks abu-abu, nggak ada garis bawah)
+        const inactiveClass = "flex-1 py-4 text-sm font-bold text-slate-500 border-b-4 border-transparent hover:bg-slate-50 hover:text-slate-900 transition-colors";
+
+        if(type === 'portfolio') {
+            btnPorto.className = activeClass;
+            btnLearn.className = inactiveClass;
+        } else {
+            btnPorto.className = inactiveClass;
+            btnLearn.className = activeClass;
+        }
+
+        // Reset Data & Fetch Ulang
+        postsWrapper.innerHTML = '';
+        currentOffset = 0;
+        allLoaded = false;
+        fetchProfilePosts();
+    }
+
+    // --- FUNGSI FORMAT WAKTU ---
     function formatTimeAgo(date) {
         const now = new Date();
         const postDate = new Date(date);
@@ -253,18 +261,24 @@
         return Math.floor(seconds / 86400) + ' hari lalu';
     }
 
-    // Fungsi Render Card Postingan (Sama Persis Kaya Beranda)
+    // --- FUNGSI RENDER POST ---
     function renderPost(post) {
-        // 1. TAMBAHIN BARIS INI DI PALING ATAS FUNGSI:
         globalPostsData[post.id] = post;
         const article = document.createElement('article');
-        article.className = 'card-hover overflow-hidden rounded-[32px] border border-slate-200 bg-white mb-6';
+        article.className = 'card-hover rounded-[32px] border border-slate-200 bg-white mb-6';
         article.id = `post-${post.id}`;
         
         const userName = post.user?.name || 'User';
         const filePath = post.image ? `/storage/${post.image}` : null; 
 
-        // --- TAMBAHAN BARU: Cek foto profil si pembuat post ---
+        // Bikin Pill Badge buat Postingan
+        let roleBadge = '';
+        if (post.user?.role === 'creator') {
+            roleBadge = `<span class="bg-violet-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full ml-2 align-middle shadow-sm">Creator</span>`;
+        } else {
+            roleBadge = `<span class="bg-slate-200 text-slate-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full ml-2 align-middle shadow-sm">Learner</span>`;
+        }
+
         const userPhoto = post.user?.photo 
             ? `/${post.user.photo}` 
             : `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=7c3aed&color=ffffff&rounded=true`;
@@ -275,16 +289,92 @@
 
         const likeColorClass = post.is_liked ? 'text-red-500' : 'text-slate-600 hover:text-red-500';
 
-        article.innerHTML = `
-            <div class="flex items-center gap-3 p-5">
-                <img src="${userPhoto}" class="h-11 w-11 rounded-full ring-2 ring-violet-50" />
-                <div>
-                    <p class="text-sm font-bold text-slate-900">${userName}</p>
-                    <p class="text-[11px] text-slate-400 uppercase font-medium">${formatTimeAgo(post.created_at)}</p>
+        // Logika Banner Gabung Kelas
+        let roomBannerHtml = '';
+        if (post.room_id && post.room) {
+            // Cek apakah user udah gabung kelas ini
+            let isJoined = false;
+            if (post.user_id === currentUserId) {
+                isJoined = true; // Kalo dia yang upload, pasti dia yang punya kelas
+            } else if (post.room.users) {
+                // Cek apakah id user ada di daftar member kelas
+                isJoined = post.room.users.some(u => u.id === currentUserId);
+            }
+
+            // Bikin Tombol Sesuai Status
+            let buttonHtml = '';
+            if (isJoined) {
+                buttonHtml = `
+                    <a href="/chat/${post.room_id}" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2.5 rounded-xl text-xs font-extrabold transition-all text-center block">
+                        Buka Kelas
+                    </a>
+                `;
+            } else {
+                buttonHtml = `
+                    <form action="/chat/join/${post.room_id}" method="POST" class="w-full sm:w-auto shrink-0">
+                        <input type="hidden" name="_token" value="${csrfToken}">
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl text-xs font-extrabold shadow-lg shadow-emerald-200 transition-all active:scale-95">
+                            Gabung Kelas
+                        </button>
+                    </form>
+                `;
+            }
+
+            roomBannerHtml = `
+                <div class="mx-5 mb-5 p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="h-10 w-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600 shrink-0 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 14v6.5" /></svg>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wider mb-0.5">Ruang Kelas Tersedia</p>
+                            <p class="text-sm font-bold text-slate-900 line-clamp-1">${post.room.name}</p>
+                        </div>
+                    </div>
+                    ${buttonHtml}
                 </div>
-            </div>
+            `;
+        }
+
+        article.innerHTML = `
+                <div class="flex items-start justify-between p-5">
+                    <div class="flex items-center gap-3">
+                        <a href="/profile/${post.user?.id}" class="shrink-0 transition-transform hover:scale-105">
+                            <img src="${userPhoto}" class="h-11 w-11 rounded-full ring-2 ring-violet-50 object-cover" />
+                        </a>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <a href="/profile/${post.user?.id}" class="text-sm font-bold text-slate-900 hover:text-violet-600 hover:underline transition-colors">${userName}</a> ${roleBadge}
+                                ${post.type === 'learning' && post.category ? `<span class="bg-violet-100 text-violet-700 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ml-1">${post.category.name}</span>` : ''}
+                            </div>
+                            <p class="text-[11px] text-slate-400 uppercase font-medium">${formatTimeAgo(post.created_at)}</p>
+                        </div>
+                    </div>
+
+                    ${post.user_id === currentUserId ? `
+                    <div class="relative shrink-0 ml-4">
+                        <button onclick="togglePostMenu(${post.id})" class="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                            </svg>
+                        </button>
+                        
+                        <div id="post-menu-${post.id}" class="hidden absolute right-0 mt-1 w-36 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden py-1">
+                            <button onclick="editPost(${post.id})" class="w-full text-left px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-violet-600 transition-colors flex items-center gap-2">
+                                <span>✏️</span> Edit
+                            </button>
+                            <button onclick="deletePost(${post.id})" class="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2 border-t border-slate-50">
+                                <span>🗑️</span> Hapus
+                            </button>
+                        </div>
+                    </div>
+                    ` : ''} 
+                </div>
+
             <div class="px-5 pb-4 text-sm text-slate-700 leading-relaxed">${post.content}</div>
-            
+
+            ${roomBannerHtml}
+
             <div class="mx-5 mb-5 overflow-hidden rounded-2xl bg-slate-100 flex items-center justify-center">
                 ${isImage && filePath ? `<img src="${filePath}" class="w-full h-auto object-cover max-h-[500px]">` : ''}
                 ${isVideo && filePath ? `<video src="${filePath}" controls class="w-full h-auto max-h-[500px] bg-black"></video>` : ''}
@@ -313,80 +403,81 @@
         return article;
     }
 
-    // Fungsi Fetch Postingan
-    async function fetchUserPosts(offset, limit) {
-        if (isLoading || allPostsLoaded) return;
+    // --- FUNGSI FETCH POSTINGAN AJAX ---
+    async function fetchProfilePosts() {
+        if (isLoading || allLoaded) return;
         isLoading = true;
+        loadingIndicator.classList.remove('hidden');
 
         try {
-            // PERHATIKAN INI: Kita tambahin parameter user_id di URL
-            const response = await fetch(`/posts/fetch?offset=${offset}&limit=${limit}&user_id=${profileUserId}`);
+            // Nembak ke API yang udah bawa parameter type dan user_id
+            const response = await fetch(`/posts/fetch?offset=${currentOffset}&limit=5&type=${currentTab}&user_id=${profileUserId}`);
             const result = await response.json();
 
             if (result.success) {
-                // Kalau ini load pertama kali, bersihin placeholder-nya dulu
-                if (offset === 0) {
-                    postsWrapper.innerHTML = ''; 
-                }
-
                 if (result.data.length > 0) {
                     result.data.forEach(post => {
                         postsWrapper.appendChild(renderPost(post));
                     });
                     currentOffset += result.data.length;
-                    
-                    if (result.data.length < limit) {
-                        allPostsLoaded = true;
+                } else {
+                    allLoaded = true;
+                    // Teks kalau kosong
+                    if(currentOffset === 0) {
+                         postsWrapper.innerHTML = `
+                            <div class="text-center py-10 bg-white rounded-[32px] border border-slate-200">
+                                <p class="text-slate-500 font-medium italic">Belum ada postingan ${currentTab} nih.</p>
+                            </div>`;
                     }
-                } else if (offset === 0) {
-                    // Kalau emang user ini belum pernah posting sama sekali
-                    postsWrapper.innerHTML = `
-                        <div class="text-center py-10 bg-white rounded-[32px] border border-slate-200">
-                            <p class="text-slate-500 font-medium">Belum ada postingan.</p>
-                        </div>
-                    `;
-                    allPostsLoaded = true;
                 }
             }
         } catch (error) {
             console.error('Fetch Error:', error);
         } finally {
             isLoading = false;
+            loadingIndicator.classList.add('hidden');
         }
     }
 
-    // Panggil fungsi saat halaman pertama kali dibuka
-    fetchUserPosts(0, 5);
+    // Panggil saat pertama kali buka halaman
+    fetchProfilePosts();
+
+    // Infinite Scroll
+    window.addEventListener('scroll', () => {
+        if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 500) {
+            fetchProfilePosts();
+        }
+    });
 
     // --- FUNGSI LIKE ---
-        async function handleLike(postId) {
-            const btnElement = document.getElementById(`like-btn-${postId}`);
-            const countElement = document.getElementById(`like-count-${postId}`);
+    async function handleLike(postId) {
+        const btnElement = document.getElementById(`like-btn-${postId}`);
+        const countElement = document.getElementById(`like-count-${postId}`);
+        
+        try {
+            const response = await fetch(`/posts/${postId}/like`, {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+            });
+            const result = await response.json();
             
-            try {
-                const response = await fetch(`/posts/${postId}/like`, {
-                    method: 'POST',
-                    headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
-                });
-                const result = await response.json();
-                
-                let currentCount = parseInt(countElement.innerText);
+            let currentCount = parseInt(countElement.innerText);
 
-                if (result.status === 'liked') {
-                    btnElement.classList.remove('text-slate-600', 'hover:text-red-500');
-                    btnElement.classList.add('text-red-500');
-                    countElement.innerText = currentCount + 1;
-                    globalPostsData[postId].is_liked = true;
-                } else {
-                    btnElement.classList.remove('text-red-500');
-                    btnElement.classList.add('text-slate-600', 'hover:text-red-500');
-                    countElement.innerText = currentCount - 1;
-                    globalPostsData[postId].is_liked = false;
-                }
-            } catch (error) {
-                console.error("Gagal melakukan like:", error);
+            if (result.status === 'liked') {
+                btnElement.classList.remove('text-slate-600', 'hover:text-red-500');
+                btnElement.classList.add('text-red-500');
+                countElement.innerText = currentCount + 1;
+                globalPostsData[postId].is_liked = true;
+            } else {
+                btnElement.classList.remove('text-red-500');
+                btnElement.classList.add('text-slate-600', 'hover:text-red-500');
+                countElement.innerText = currentCount - 1;
+                globalPostsData[postId].is_liked = false;
             }
+        } catch (error) {
+            console.error("Gagal melakukan like:", error);
         }
+    }
 
         // --- FUNGSI KOMENTAR FLOATING MODAL ---
         function openCommentModal(postId) {
@@ -421,34 +512,40 @@
         });
 
         function appendCommentToUI(comment, isReply = false) {
-            console.log("CEK DATA KOMENTAR:", comment);
-            const userName = comment.user?.name || 'User';
+        console.log("CEK DATA KOMENTAR:", comment);
+        const userName = comment.user?.name || 'User';
 
-           // --- TAMBAHAN BARU: Cek foto profil si pengomen ---
-            const commenterPhoto = comment.user?.photo 
-                ? `${window.location.origin}/${comment.user.photo}` 
-                : `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=e2e8f0&color=475569`;
-
-            const noDataHtml = commentsList.querySelector('p.text-slate-400');
-            if (noDataHtml) noDataHtml.remove();
-
-            const commentDiv = document.createElement('div');
-            // Kalau isReply = true, kasih margin kiri biar menjorok
-            commentDiv.className = `flex gap-3 ${isReply ? 'ml-10 mt-2' : 'mt-5'}`;
-    
-            commentDiv.innerHTML = `
-                <img src="${commenterPhoto}" class="h-8 w-8 rounded-full shrink-0">
-                <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm flex-1">
-                    <div class="flex justify-between items-center mb-0.5">
-                        <p class="text-[11px] font-bold text-slate-500">${userName}</p>
-                        ${!isReply ? `<button onclick="setReply(${comment.id}, '${userName}')" class="text-[10px] text-violet-500 hover:underline">Balas</button>` : ''}
-                    </div>
-                    <p class="text-sm text-slate-800">${comment.body}</p>
-                </div>
-            `;
-            commentsList.appendChild(commentDiv);
-            commentsList.scrollTop = commentsList.scrollHeight; 
+        // Bikin Pill Badge buat Komentar (Pake var 'comment', bukan 'post')
+        let roleBadgeComment = '';
+        if (comment.user?.role === 'creator') {
+            roleBadgeComment = `<span class="bg-violet-600 text-white text-[8px] font-bold px-2 py-0.5 rounded-full ml-1.5 align-middle shadow-sm">Creator</span>`;
+        } else {
+            roleBadgeComment = `<span class="bg-slate-200 text-slate-600 text-[8px] font-bold px-2 py-0.5 rounded-full ml-1.5 align-middle shadow-sm">Learner</span>`;
         }
+
+        const commenterPhoto = comment.user?.photo 
+            ? `${window.location.origin}/${comment.user.photo}` 
+            : `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=e2e8f0&color=475569`;
+
+        const noDataHtml = commentsList.querySelector('p.text-slate-400');
+        if (noDataHtml) noDataHtml.remove();
+
+        const commentDiv = document.createElement('div');
+        commentDiv.className = `flex gap-3 ${isReply ? 'ml-10 mt-2' : 'mt-5'}`;
+        
+        commentDiv.innerHTML = `
+            <img src="${commenterPhoto}" class="h-8 w-8 rounded-full shrink-0">
+            <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm flex-1">
+                <div class="flex justify-between items-center mb-0.5">
+                    <p class="text-[11px] font-bold text-slate-500">${userName} ${roleBadgeComment}</p>
+                    ${!isReply ? `<button onclick="setReply(${comment.id}, '${userName}')" class="text-[10px] text-violet-500 hover:underline">Balas</button>` : ''}
+                </div>
+                <p class="text-sm text-slate-800">${comment.body}</p>
+            </div>
+        `;
+        commentsList.appendChild(commentDiv);
+        commentsList.scrollTop = commentsList.scrollHeight; 
+    }
 
         // Tambahin dua fungsi ini tepat di bawahnya
         function setReply(commentId, name) {
@@ -553,6 +650,140 @@
                 console.error("Gagal melakukan follow:", error);
             } finally {
                 followBtn.disabled = false;
+            }
+        }
+
+        // Buka/Tutup Dropdown Menu Titik Tiga
+        function togglePostMenu(id) {
+            const menu = document.getElementById(`post-menu-${id}`);
+            menu.classList.toggle('hidden');
+        }
+
+        // Kalau sembarang tempat diklik, menu titik tiganya otomatis ketutup
+        document.addEventListener('click', function(event) {
+            const isClickInsideMenu = event.target.closest('[id^="post-menu-"]');
+            const isClickOnButton = event.target.closest('button[onclick^="togglePostMenu"]');
+            
+            if (!isClickInsideMenu && !isClickOnButton) {
+                document.querySelectorAll('[id^="post-menu-"]').forEach(menu => {
+                    menu.classList.add('hidden');
+                });
+            }
+        });
+
+        // Fitur Hapus Postingan (AJAX, Mulus tanpa Reload)
+        async function deletePost(id) {
+            if(!confirm('Beneran mau hapus postingan ini, beb? Nggak bisa di-undo lho.')) return;
+            
+            try {
+                const response = await fetch(`/posts/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                if(result.success) {
+                    // Hapus kartu postingan dari layar!
+                    const postCard = document.getElementById(`post-${id}`);
+                    postCard.style.transform = 'scale(0.9)';
+                    postCard.style.opacity = '0';
+                    setTimeout(() => postCard.remove(), 300);
+                } else {
+                    alert('Gagal hapus: ' + result.message);
+                }
+            } catch(e) {
+                alert('Gagal kontak server, beb.');
+            }
+        }
+
+        // --- FITUR EDIT POSTINGAN ---
+        
+        // 1. Buka Modal & Isi Teks Lama
+        function editPost(id) {
+            const post = globalPostsData[id];
+            if(!post) return alert('Waduh, data postingan ilang dari memori beb!');
+
+            // Masukin data ke form modal
+            document.getElementById('editPostId').value = id;
+            document.getElementById('editCaptionText').value = post.content;
+            
+            // Munculin modal pake animasi
+            const modal = document.getElementById('editPostModal');
+            const modalContent = document.getElementById('editModalContent');
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
+            
+            // Tutup dropdown titik 3-nya
+            togglePostMenu(id);
+        }
+
+        // 2. Tutup Modal
+        function closeEditModal() {
+            const modal = document.getElementById('editPostModal');
+            const modalContent = document.getElementById('editModalContent');
+            
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        // 3. Tembak AJAX buat nyimpen Edit
+        async function saveEditPost() {
+            const id = document.getElementById('editPostId').value;
+            const newContent = document.getElementById('editCaptionText').value.trim();
+            const btn = document.getElementById('btnSaveEdit');
+
+            if(!newContent) return alert('Caption nggak boleh kosong dong beb, masa sepi amat!');
+
+            btn.innerText = 'Menyimpan...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`/posts/${id}`, {
+                    method: 'PUT', // Pake metode PUT buat update data
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ content: newContent })
+                });
+
+                const result = await response.json();
+                
+                if(result.success) {
+                    // Update memori lokal JS lu
+                    globalPostsData[id].content = newContent;
+                    
+                    // JURUS ILUSI: Ganti teks di layar secara instan tanpa loading!
+                    const postCard = document.getElementById(`post-${id}`);
+                    const contentDiv = postCard.querySelector('.px-5.pb-4.text-sm.text-slate-700.leading-relaxed');
+                    if(contentDiv) {
+                        contentDiv.innerText = newContent;
+                        // Kasih animasi kedip kuning dikit biar tau kalo udah berubah
+                        contentDiv.classList.add('bg-yellow-100', 'transition-colors', 'duration-500');
+                        setTimeout(() => contentDiv.classList.remove('bg-yellow-100'), 500);
+                    }
+
+                    closeEditModal();
+                } else {
+                    alert('Gagal update beb: ' + result.message);
+                }
+            } catch(e) {
+                alert('Gagal nyambung ke server nih.');
+            } finally {
+                btn.innerText = 'Simpan Perubahan';
+                btn.disabled = false;
             }
         }
 </script>

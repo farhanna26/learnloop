@@ -55,53 +55,9 @@
 
     <main class="mx-auto max-w-7xl px-4 py-8 pb-24 sm:px-6">
         <div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
-            
-            <aside class="hidden lg:col-span-3 lg:block">
-                <div class="sticky top-28 space-y-4">
-                    <nav class="space-y-1">
-                        <a href="/beranda" class="group flex items-center gap-3 rounded-2xl bg-violet-50 px-4 py-3 text-sm font-bold text-violet-700 transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                            Beranda
-                        </a>
-                        <a href="/contacts" class="group flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">
-                            <div class="flex items-center gap-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                                Pesan
-                            </div>
-                        </a>
-                        <a href="/search" class="group flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">
-                            <div class="flex items-center gap-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                                Search
-                            </div>
-                        </a>
-                        <a href="/notifications" class="group flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900 {{ request()->is('notifications') ? 'bg-violet-50 text-violet-700 font-bold' : '' }}">
-                            <div class="flex items-center gap-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                </svg>
-                                Notifikasi
-                            </div>
-                            
-                            @php $unreadCount = auth()->user()->notifications()->where('is_read', false)->count(); @endphp
-                            @if($unreadCount > 0)
-                                <span class="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
-                                    {{ $unreadCount }}
-                                </span>
-                            @endif
-                        </a>
-                        <a href="/profile" class="group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition-all hover:bg-slate-100 hover:text-slate-900">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-70 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                            Profil
-                        </a>
-                    </nav>
-                </div>
-            </aside>
-                <section id="feedContainer" class="lg:col-span-6 space-y-8">
+            @include('components.sidebar')
+
+            <section id="feedContainer" class="lg:col-span-6 space-y-8">
                     
                     @if(session('success'))
                         <div class="animate-fade-in flex items-center gap-3 rounded-[24px] border border-emerald-100 bg-emerald-50 p-4 text-sm font-bold text-emerald-700 shadow-sm">
@@ -118,7 +74,27 @@
                         <p class="text-sm text-slate-500 mt-1">Bagikan materi atau hasil karyamu hari ini.</p>
                     </div>
 
-                <div id="postsWrapper" class="space-y-6"></div>
+                    <div class="my-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in">
+                        <div class="flex items-center gap-2 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm w-fit">
+                            <button id="tab-portfolio" onclick="switchFeedType('portfolio')" class="px-5 py-2 rounded-xl text-sm font-bold bg-slate-900 text-white transition-all shadow-sm">
+                                Portofolio
+                            </button>
+                            <button id="tab-learning" onclick="switchFeedType('learning')" class="px-5 py-2 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-all">
+                                Pembelajaran
+                            </button>
+                        </div>
+
+                        @if(auth()->user()->role === 'creator')
+                            <button onclick="document.getElementById('learningUploadModal').classList.remove('hidden')" class="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md shadow-violet-200 active:scale-95">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Upload Materi Pembelajaran
+                            </button>
+                        @endif
+                    </div>
+
+                    <div id="postsWrapper" class="space-y-6"></div>
 
                 <div id="loadingIndicator" class="hidden text-center py-6">
                     <div class="inline-block animate-spin">
@@ -133,7 +109,7 @@
                 </div>
             </section>
 
-            <aside class="hidden lg:col-span-3 lg:block"></aside>
+            @include('components.right-sidebar')
         </div>
     </main>
 
@@ -175,7 +151,98 @@
         </div>
     </div>
 
+    <div id="learningUploadModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="w-full max-w-lg rounded-[32px] bg-white p-8 shadow-2xl">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-extrabold text-slate-900">Upload Materi Baru</h3>
+                <button onclick="document.getElementById('learningUploadModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 p-2 rounded-full transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            @php $categories = \App\Models\Category::all(); @endphp
+
+            <form id="learningUploadForm" onsubmit="submitLearningPost(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Kategori Materi</label>
+                    <select id="learningCategory" class="w-full rounded-2xl border border-slate-200 p-3.5 text-sm font-medium outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all bg-slate-50 cursor-pointer" required>
+                        <option value="" disabled selected>Pilih Kategori Pembelajaran...</option>
+                        @foreach($categories as $category)
+                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Judul / Deskripsi Materi</label>
+                    <textarea id="learningCaption" rows="3" class="w-full rounded-2xl border border-slate-200 p-4 text-sm outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all bg-slate-50" placeholder="Jelaskan isi materi ini..." required></textarea>
+                </div>
+
+                <div class="mb-8">
+                    <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">File Materi (PDF/Video/Gambar)</label>
+                    <input type="file" id="learningFile" class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 transition-colors cursor-pointer" accept="image/*,video/*,.pdf" required>
+                </div>
+
+                <div class="mb-6 p-4 border border-violet-100 bg-violet-50 rounded-2xl">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" id="checkBuatKelas" name="create_class" value="true" class="w-5 h-5 text-violet-600 rounded focus:ring-violet-500" onchange="document.getElementById('areaNamaKelas').classList.toggle('hidden')">
+                        <span class="text-sm font-bold text-violet-900">Sekaligus buat Ruang Kelas Pembelajaran?</span>
+                    </label>
+                    <div id="areaNamaKelas" class="hidden mt-3 pt-3 border-t border-violet-100">
+                        <label class="text-xs font-bold text-violet-700 mb-1 block">Nama Kelas</label>
+                        <input type="text" id="inputClassName" name="class_name" placeholder="Misal: Masterclass Laravel Basic..." class="w-full bg-white border border-violet-200 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 rounded-xl px-4 py-2.5 text-sm outline-none transition-all">
+                    </div>
+                </div>
+
+                <button type="submit" id="btnSubmitLearning" class="w-full rounded-2xl bg-violet-600 py-4 text-sm font-bold text-white hover:bg-violet-700 transition-all shadow-lg shadow-violet-200 active:scale-95">Upload Materi Sekarang</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="editPostModal" class="fixed inset-0 z-[80] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all">
+        <div class="w-full max-w-lg rounded-[32px] bg-white p-8 shadow-2xl transform transition-all scale-95 opacity-0 duration-200" id="editModalContent">
+            <h3 class="text-xl font-bold mb-6 text-slate-900">Edit Caption Postingan</h3>
+            
+            <input type="hidden" id="editPostId">
+            
+            <textarea id="editCaptionText" rows="4" class="w-full rounded-2xl border border-slate-200 p-4 text-sm outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all bg-slate-50 custom-scrollbar" placeholder="Tulis ulang caption lu di sini..."></textarea>
+            
+            <div class="mt-6 flex gap-3">
+                <button onclick="closeEditModal()" class="w-full rounded-2xl bg-slate-100 py-3.5 text-sm font-bold text-slate-600 hover:bg-slate-200 transition-all">Batal</button>
+                <button onclick="saveEditPost()" id="btnSaveEdit" class="w-full rounded-2xl bg-violet-600 py-3.5 text-sm font-bold text-white hover:bg-violet-700 transition-all shadow-lg shadow-violet-200 active:scale-95">Simpan Perubahan</button>
+            </div>
+        </div>
+    </div>
     <script>
+        // Variabel global buat nentuin lagi di tab mana
+        let currentFeedType = 'portfolio';
+
+        function switchFeedType(type) {
+            currentFeedType = type;
+            
+            const btnPorto = document.getElementById('tab-portfolio');
+            const btnLearn = document.getElementById('tab-learning');
+
+            // Reset styling
+            btnPorto.className = "px-5 py-2 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-all";
+            btnLearn.className = "px-5 py-2 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-all";
+
+            if(type === 'portfolio') {
+                btnPorto.className = "px-5 py-2 rounded-xl text-sm font-bold bg-slate-900 text-white transition-all shadow-sm";
+            } else {
+                btnLearn.className = "px-5 py-2 rounded-xl text-sm font-bold bg-slate-900 text-white transition-all shadow-sm";
+            }
+
+            // JURUS RESET FEED
+            postsWrapper.innerHTML = ''; // Kosongin postingan yang lagi nampil
+            currentOffset = 0; // Balikin hitungan ke nol
+            allPostsLoaded = false; 
+            noMorePosts.classList.add('hidden'); // Sembunyiin teks "Sudah di penghujung"
+            
+            // Tarik data ulang dengan tipe yang baru!
+            fetchPosts(0, 5);
+        }
+
         const uploadBtn = document.getElementById('uploadBtn');
         const fileInput = document.getElementById('fileInput');
         const uploadModal = document.getElementById('uploadModal');
@@ -187,6 +254,7 @@
         const loadingIndicator = document.getElementById('loadingIndicator');
         const noMorePosts = document.getElementById('noMorePosts');
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const currentUserId = {{ Auth::id() }};
 
         // Variabel Komentar Modal
         const commentModal = document.getElementById('commentModal');
@@ -215,16 +283,22 @@
 
         // --- FUNGSI RENDER UTAMA ---
         function renderPost(post) {
-            globalPostsData[post.id] = post; // Simpan di global variabel
-
+            globalPostsData[post.id] = post;
             const article = document.createElement('article');
-            article.className = 'card-hover overflow-hidden rounded-[32px] border border-slate-200 bg-white mb-6';
+            article.className = 'card-hover rounded-[32px] border border-slate-200 bg-white mb-6';
             article.id = `post-${post.id}`;
             
             const userName = post.user?.name || 'User';
             const filePath = post.image ? `/storage/${post.image}` : null; 
 
-            // --- TAMBAHAN BARU: Cek foto profil si pembuat post ---
+            // Bikin Pill Badge buat Postingan
+            let roleBadge = '';
+            if (post.user?.role === 'creator') {
+                roleBadge = `<span class="bg-violet-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full ml-2 align-middle shadow-sm">Creator</span>`;
+            } else {
+                roleBadge = `<span class="bg-slate-200 text-slate-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full ml-2 align-middle shadow-sm">Learner</span>`;
+            }
+
             const userPhoto = post.user?.photo 
                 ? `/${post.user.photo}` 
                 : `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=7c3aed&color=ffffff&rounded=true`;
@@ -233,19 +307,92 @@
             const isPDF = post.image?.match(/\.(pdf)$/i);
             const isImage = post.image?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
 
-            // Cek Status Like (Merah kalau is_liked true)
             const likeColorClass = post.is_liked ? 'text-red-500' : 'text-slate-600 hover:text-red-500';
 
-            article.innerHTML = `
-                <div class="flex items-center gap-3 p-5">
-                    <img src="${userPhoto}" class="h-11 w-11 rounded-full ring-2 ring-violet-50" />
-                    <div>
-                        <p class="text-sm font-bold text-slate-900">${userName}</p>
-                        <p class="text-[11px] text-slate-400 uppercase font-medium">${formatTimeAgo(post.created_at)}</p>
+            // Logika Banner Gabung Kelas
+            let roomBannerHtml = '';
+            if (post.room_id && post.room) {
+                let isJoined = false;
+                if (post.user_id === currentUserId) {
+                    isJoined = true; 
+                } else if (post.room.users) {
+                    isJoined = post.room.users.some(u => u.id === currentUserId);
+                }
+
+                let buttonHtml = '';
+                if (isJoined) {
+                    buttonHtml = `
+                        <a href="/chat/${post.room_id}" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2.5 rounded-xl text-xs font-extrabold transition-all text-center block">
+                            Buka Kelas
+                        </a>
+                    `;
+                } else {
+                    buttonHtml = `
+                        <form action="/chat/join/${post.room_id}" method="POST" class="w-full sm:w-auto shrink-0">
+                            <input type="hidden" name="_token" value="${csrfToken}">
+                            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl text-xs font-extrabold shadow-lg shadow-emerald-200 transition-all active:scale-95">
+                                Gabung Kelas
+                            </button>
+                        </form>
+                    `;
+                }
+
+                roomBannerHtml = `
+                    <div class="mx-5 mb-5 p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="h-10 w-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600 shrink-0 shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 14v6.5" /></svg>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wider mb-0.5">Ruang Kelas Tersedia</p>
+                                <p class="text-sm font-bold text-slate-900 line-clamp-1">${post.room.name}</p>
+                            </div>
+                        </div>
+                        ${buttonHtml}
                     </div>
+                `;
+            }
+
+            article.innerHTML = `
+                <div class="flex items-start justify-between p-5">
+                    <div class="flex items-center gap-3">
+                        <a href="/profile/${post.user?.id}" class="shrink-0 transition-transform hover:scale-105">
+                            <img src="${userPhoto}" class="h-11 w-11 rounded-full ring-2 ring-violet-50 object-cover" />
+                        </a>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <a href="/profile/${post.user?.id}" class="text-sm font-bold text-slate-900 hover:text-violet-600 hover:underline transition-colors">${userName}</a> ${roleBadge}
+                                ${post.type === 'learning' && post.category ? `<span class="bg-violet-100 text-violet-700 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ml-1">${post.category.name}</span>` : ''}
+                            </div>
+                            <p class="text-[11px] text-slate-400 uppercase font-medium">${formatTimeAgo(post.created_at)}</p>
+                        </div>
+                    </div>
+
+                    ${post.user_id === currentUserId ? `
+                    <div class="relative shrink-0 ml-4">
+                        <button onclick="togglePostMenu(${post.id})" class="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                            </svg>
+                        </button>
+                        
+                        <div id="post-menu-${post.id}" class="hidden absolute right-0 mt-1 w-36 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden py-1">
+                            <button onclick="editPost(${post.id})" class="w-full text-left px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-violet-600 transition-colors flex items-center gap-2">
+                                <span>✏️</span> Edit
+                            </button>
+                            <button onclick="deletePost(${post.id})" class="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2 border-t border-slate-50">
+                                <span>🗑️</span> Hapus
+                            </button>
+                        </div>
+                        <a href="/profile/${post.user?.id}" class="text-sm font-bold text-slate-900 hover:text-violet-600 hover:underline transition-colors">${userName}</a> ${roleBadge}
+                    </div>
+                    ` : ''} 
                 </div>
+
                 <div class="px-5 pb-4 text-sm text-slate-700 leading-relaxed">${post.content}</div>
-                
+
+                ${roomBannerHtml}
+
                 <div class="mx-5 mb-5 overflow-hidden rounded-2xl bg-slate-100 flex items-center justify-center">
                     ${isImage && filePath ? `<img src="${filePath}" class="w-full h-auto object-cover max-h-[500px]">` : ''}
                     ${isVideo && filePath ? `<video src="${filePath}" controls class="w-full h-auto max-h-[500px] bg-black"></video>` : ''}
@@ -253,9 +400,7 @@
                         <div class="w-full flex items-center justify-between p-6 bg-violet-50 border border-violet-100 rounded-2xl">
                             <div class="flex items-center gap-4">
                                 <div class="h-12 w-12 flex items-center justify-center bg-white rounded-xl shadow-sm text-red-500 font-bold text-[10px]">PDF</div>
-                                <div class="overflow-hidden">
-                                    <p class="text-sm font-bold text-slate-900 truncate max-w-[150px]">Dokumen Materi</p>
-                                </div>
+                                <p class="text-sm font-bold text-slate-900 truncate max-w-[150px]">Dokumen Materi</p>
                             </div>
                             <a href="${filePath}" target="_blank" class="rounded-xl bg-violet-600 px-4 py-2 text-xs font-bold text-white hover:bg-violet-700 shadow-lg shadow-violet-100">Buka File</a>
                         </div>
@@ -340,7 +485,14 @@
             console.log("CEK DATA KOMENTAR:", comment);
             const userName = comment.user?.name || 'User';
 
-            // --- TAMBAHAN BARU: Cek foto profil si pengomen ---
+            // Bikin Pill Badge buat Komentar
+            let roleBadgeComment = '';
+            if (comment.user?.role === 'creator') {
+                roleBadgeComment = `<span class="bg-violet-600 text-white text-[8px] font-bold px-2 py-0.5 rounded-full ml-1.5 align-middle shadow-sm">Creator</span>`;
+            } else {
+                roleBadgeComment = `<span class="bg-slate-200 text-slate-600 text-[8px] font-bold px-2 py-0.5 rounded-full ml-1.5 align-middle shadow-sm">Learner</span>`;
+            }
+
             const commenterPhoto = comment.user?.photo 
                 ? `${window.location.origin}/${comment.user.photo}` 
                 : `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=e2e8f0&color=475569`;
@@ -349,14 +501,13 @@
             if (noDataHtml) noDataHtml.remove();
 
             const commentDiv = document.createElement('div');
-            // Kalau isReply = true, kasih margin kiri biar menjorok
             commentDiv.className = `flex gap-3 ${isReply ? 'ml-10 mt-2' : 'mt-5'}`;
-    
+            
             commentDiv.innerHTML = `
                 <img src="${commenterPhoto}" class="h-8 w-8 rounded-full shrink-0">
                 <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm flex-1">
                     <div class="flex justify-between items-center mb-0.5">
-                        <p class="text-[11px] font-bold text-slate-500">${userName}</p>
+                        <p class="text-[11px] font-bold text-slate-500">${userName} ${roleBadgeComment}</p>
                         ${!isReply ? `<button onclick="setReply(${comment.id}, '${userName}')" class="text-[10px] text-violet-500 hover:underline">Balas</button>` : ''}
                     </div>
                     <p class="text-sm text-slate-800">${comment.body}</p>
@@ -432,7 +583,7 @@
             loadingIndicator.classList.remove('hidden');
 
             try {
-                const response = await fetch(`/posts/fetch?offset=${offset}&limit=${limit}`);
+                const response = await fetch(`/posts/fetch?offset=${offset}&limit=${limit}&type=${currentFeedType}`);
                 const result = await response.json();
 
                 if (result.success) {
@@ -541,6 +692,191 @@
         });
 
         closeModal.addEventListener('click', () => uploadModal.classList.add('hidden'));
+
+        // Fungsi Eksekusi Upload Materi
+        async function submitLearningPost(e) {
+            e.preventDefault();
+            const caption = document.getElementById('learningCaption').value;
+            const categoryId = document.getElementById('learningCategory').value;
+            const file = document.getElementById('learningFile').files[0];
+            const btn = document.getElementById('btnSubmitLearning');
+
+            // Tangkep isian Checkbox Bikin Kelas
+            const isCreateClass = document.getElementById('checkBuatKelas').checked;
+            const className = document.getElementById('inputClassName').value;
+
+            if (!caption || !file || !categoryId) return alert("Semua kolom wajib diisi, beb!");
+            if (isCreateClass && !className) return alert("Nama kelas harus diisi kalau mau bikin kelas!");
+
+            btn.innerText = "Mengunggah Materi...";
+            btn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('content', caption);
+            formData.append('image', file);
+            formData.append('type', 'learning'); // Otomatis nembak tipe learning
+            formData.append('category_id', categoryId); // Kirim ID kategori
+
+            // Masukin data kelas kalau dicentang
+            if (isCreateClass) {
+                formData.append('create_class', 'true');
+                formData.append('class_name', className);
+            }
+
+            try {
+                const response = await fetch('/posts', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-CSRF-TOKEN': csrfToken }
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('Materi sukses mendarat!');
+                    document.getElementById('learningUploadModal').classList.add('hidden');
+                    document.getElementById('learningUploadForm').reset();
+                    
+                    // REFRESH TAB PEMBELAJARAN BIAR POSTINGAN BARU LANGSUNG MUNCUL
+                    switchFeedType('learning');
+                }
+            } catch (error) {
+                alert("Waduh, upload gagal!");
+            } finally {
+                btn.innerText = "Upload Materi Sekarang";
+                btn.disabled = false;
+            }
+        }
+
+        // Buka/Tutup Dropdown Menu Titik Tiga
+        function togglePostMenu(id) {
+            const menu = document.getElementById(`post-menu-${id}`);
+            menu.classList.toggle('hidden');
+        }
+
+        // Kalau sembarang tempat diklik, menu titik tiganya otomatis ketutup
+        document.addEventListener('click', function(event) {
+            const isClickInsideMenu = event.target.closest('[id^="post-menu-"]');
+            const isClickOnButton = event.target.closest('button[onclick^="togglePostMenu"]');
+            
+            if (!isClickInsideMenu && !isClickOnButton) {
+                document.querySelectorAll('[id^="post-menu-"]').forEach(menu => {
+                    menu.classList.add('hidden');
+                });
+            }
+        });
+
+        // Fitur Hapus Postingan (AJAX, Mulus tanpa Reload)
+        async function deletePost(id) {
+            if(!confirm('Beneran mau hapus postingan ini, beb? Nggak bisa di-undo lho.')) return;
+            
+            try {
+                const response = await fetch(`/posts/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                if(result.success) {
+                    // Hapus kartu postingan dari layar!
+                    const postCard = document.getElementById(`post-${id}`);
+                    postCard.style.transform = 'scale(0.9)';
+                    postCard.style.opacity = '0';
+                    setTimeout(() => postCard.remove(), 300);
+                } else {
+                    alert('Gagal hapus: ' + result.message);
+                }
+            } catch(e) {
+                alert('Gagal kontak server, beb.');
+            }
+        }
+
+        // --- FITUR EDIT POSTINGAN ---
+        
+        // 1. Buka Modal & Isi Teks Lama
+        function editPost(id) {
+            const post = globalPostsData[id];
+            if(!post) return alert('Waduh, data postingan ilang dari memori beb!');
+
+            // Masukin data ke form modal
+            document.getElementById('editPostId').value = id;
+            document.getElementById('editCaptionText').value = post.content;
+            
+            // Munculin modal pake animasi
+            const modal = document.getElementById('editPostModal');
+            const modalContent = document.getElementById('editModalContent');
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
+            
+            // Tutup dropdown titik 3-nya
+            togglePostMenu(id);
+        }
+
+        // 2. Tutup Modal
+        function closeEditModal() {
+            const modal = document.getElementById('editPostModal');
+            const modalContent = document.getElementById('editModalContent');
+            
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        // 3. Tembak AJAX buat nyimpen Edit
+        async function saveEditPost() {
+            const id = document.getElementById('editPostId').value;
+            const newContent = document.getElementById('editCaptionText').value.trim();
+            const btn = document.getElementById('btnSaveEdit');
+
+            if(!newContent) return alert('Caption nggak boleh kosong dong beb, masa sepi amat!');
+
+            btn.innerText = 'Menyimpan...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`/posts/${id}`, {
+                    method: 'PUT', // Pake metode PUT buat update data
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ content: newContent })
+                });
+
+                const result = await response.json();
+                
+                if(result.success) {
+                    globalPostsData[id].content = newContent;
+                
+                    const postCard = document.getElementById(`post-${id}`);
+                    const contentDiv = postCard.querySelector('.px-5.pb-4.text-sm.text-slate-700.leading-relaxed');
+                    if(contentDiv) {
+                        contentDiv.innerText = newContent;
+                        contentDiv.classList.add('bg-yellow-100', 'transition-colors', 'duration-500');
+                        setTimeout(() => contentDiv.classList.remove('bg-yellow-100'), 500);
+                    }
+
+                    closeEditModal();
+                } else {
+                    alert('Gagal update: ' + result.message);
+                }
+            } catch(e) {
+                alert('Gagal terhubung ke server nih.');
+            } finally {
+                btn.innerText = 'Simpan Perubahan';
+                btn.disabled = false;
+            }
+        }
     </script>
 </body>
 </html>

@@ -11,6 +11,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 // KITA GABUNGIN: Fillable standar lu + data profil buatan Aya
+<<<<<<< HEAD
 #[Fillable([
     'name',
     'email',
@@ -22,6 +23,9 @@ use Illuminate\Notifications\Notifiable;
     'gmail',
     'role'
 ])]
+=======
+#[Fillable(['name', 'email', 'password', 'description', 'photo', 'location', 'linkedin', 'gmail', 'role'])]
+>>>>>>> afe4e9dc60f9ad7e6dbce1feec8492cace80a566
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -83,5 +87,11 @@ class User extends Authenticatable
         return $this->hasMany(Notification::class)
                     ->where('is_read', false)
                     ->count();
+    }
+
+    // TAMBAHAN BARU: Relasi ke pengumpulan tugas biar bisa dihitung total nilainya
+    public function submissions()
+    {
+        return $this->hasMany(Submission::class);
     }
 }

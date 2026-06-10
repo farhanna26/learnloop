@@ -41,11 +41,33 @@ Route::middleware('auth')->group(function () {
     Route::post('/posts', [PostController::class, 'store']);
     Route::post('/posts/{id}/comment', [PostController::class, 'storeComment']);
     Route::post('/posts/{id}/like', [PostController::class, 'toggleLike']);
+    Route::get('/api/posts/{id}', [PostController::class, 'show']);
+    Route::post('/assignments', [App\Http\Controllers\ChatController::class, 'storeAssignment']);
+    Route::post('/submissions', [App\Http\Controllers\ChatController::class, 'storeSubmission']);
+    Route::post('/submissions/{id}/grade', [App\Http\Controllers\ChatController::class, 'gradeSubmission']);
+    Route::delete('/posts/{id}', [PostController::class, 'destroy']);
+    Route::put('/posts/{id}', [PostController::class, 'update']);
 
     // 3. === RUTE CHAT ===
     Route::get('/chat/private/{targetUserId}', [ChatController::class, 'createOrFindPrivateChat']);
     Route::get('/chat/{roomId}', [ChatController::class, 'index']);
     Route::post('/chat/send', [ChatController::class, 'store']);
+    Route::post('/chat/group/create', [ChatController::class, 'createGroup']);
+    Route::post('/chat/group/accept/{notificationId}', [ChatController::class, 'acceptInvite']);
+    Route::post('/chat/group/reject/{notificationId}', [ChatController::class, 'rejectInvite']);
+
+    // --- RUTE GROUP SETTINGS & INFO ---
+    Route::get('/chat/group/{roomId}/info', [ChatController::class, 'groupInfo'])->name('chat.group.info');
+    Route::post('/chat/group/{roomId}/update', [ChatController::class, 'updateGroup'])->name('chat.group.update');
+    Route::post('/chat/group/{roomId}/invite', [ChatController::class, 'inviteToGroup'])->name('chat.group.invite');
+    Route::post('/chat/group/{id}/update', [App\Http\Controllers\ChatController::class, 'updateGroup'])->name('chat.group.update');
+
+    // Rute Baru AI Mentor dengan Fitur History
+    Route::get('/ai-mentor', [App\Http\Controllers\AiMentorController::class, 'index']);
+    Route::post('/ai-mentor/ask', [App\Http\Controllers\AiMentorController::class, 'ask']);
+    Route::post('/ai-mentor/pin/{id}', [App\Http\Controllers\AiMentorController::class, 'togglePin']);
+    Route::delete('/ai-mentor/delete/{id}', [App\Http\Controllers\AiMentorController::class, 'deleteChat']);
+
 
     // 4. === RUTE PROFIL ===
     
@@ -71,7 +93,10 @@ Route::middleware('auth')->group(function () {
     // --- TAMBAHIN RUTE INI BUAT TOMBOL FOLLOW ---
     Route::post('/profile/{id}/follow', [UserController::class, 'toggleFollow']);
 
-    // Rute Notifikasi
+    // 5. Rute Notifikasi
     Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
     
+    // 6. RUTE LEADERBOARD
+    Route::get('/leaderboard', [App\Http\Controllers\LeaderboardController::class, 'index']);
+    Route::get('/leaderboard/data', [App\Http\Controllers\LeaderboardController::class, 'getData']);
 });

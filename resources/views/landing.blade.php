@@ -117,7 +117,7 @@
                 <h1 class="typewriter-2 text-7xl md:text-9xl font-black text-violet-600 uppercase tracking-tighter mt-2">LEARNLOOP</h1>
             </div>
             <p class="text-xl md:text-2xl text-slate-500 max-w-2xl mx-auto leading-relaxed pt-6">
-                Gabung dengan ribuan mahasiswa lainnya. Bagikan catatan, diskusi tugas, dan capai impianmu bareng Aca!
+                Gabung dengan ribuan mahasiswa lainnya. Bagikan catatan, diskusi tugas, dan capai impianmu bareng Amalia!
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center pt-8">
                 <a href="{{ route('register') }}" class="px-10 py-5 bg-violet-600 text-white rounded-2xl font-bold shadow-2xl shadow-violet-200 hover:scale-105 transition text-lg">Mulai Sekarang</a>
@@ -135,7 +135,7 @@
         <div class="p-10 bg-white rounded-[40px] border border-slate-100 shadow-sm hover:shadow-xl transition-all group text-center">
             <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-4xl mb-6 mx-auto group-hover:rotate-12 transition">📑</div>
             <h3 class="text-2xl font-bold text-slate-800">Modul Lengkap</h3>
-            <p class="mt-4 text-slate-500">Akses berbagai referensi materi dari kakak tingkatmu.</p>
+            <p class="mt-4 text-slate-500">Akses berbagai referensi materi dari para Creator.</p>
         </div>
         <div class="p-10 bg-white rounded-[40px] border border-slate-100 shadow-sm hover:shadow-xl transition-all group text-center">
             <div class="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center text-4xl mb-6 mx-auto group-hover:rotate-12 transition">⚡</div>
