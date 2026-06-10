@@ -189,4 +189,44 @@ class PostController extends Controller
             ], 404);
         }
     }
+
+    public function destroy($id)
+    {
+        $post = \App\Models\Post::findOrFail($id);
+
+        // Keamanan lapis dewa: Pastiin yang ngehapus beneran yang bikin post!
+        if ($post->user_id !== auth()->id()) {
+            return response()->json(['success' => false, 'message' => 'Ngapain lu hapus post orang, beb!'], 403);
+        }
+
+        // Kalau ada file (gambar/video/pdf), hapus juga dari storage biar memori server lu gak bengkak
+        if ($post->image) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($post->image);
+        }
+
+        // Hapus dari database
+        $post->delete();
+
+        return response()->json(['success' => true]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'content' => 'required|string'
+        ]);
+
+        $post = \App\Models\Post::findOrFail($id);
+
+        // Keamanan lapis baja: Mencegah attacker ngedit post orang lain pake Postman/Inspect Element
+        if ($post->user_id !== auth()->id()) {
+            return response()->json(['success' => false, 'message' => 'Heh, mau ngedit postingan orang lu ya?!'], 403);
+        }
+
+        // Timpa caption lama pake yang baru
+        $post->content = $request->content;
+        $post->save();
+
+        return response()->json(['success' => true]);
+    }
 }

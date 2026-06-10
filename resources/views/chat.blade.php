@@ -72,19 +72,19 @@
             <div id="chat-box" class="flex-1 overflow-y-auto p-6 space-y-6 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-slate-50 custom-scrollbar">
                 @foreach($messages as $msg)
                     @if($msg->username === Auth::user()->name)
-                        <div class="flex justify-end animate-fade-in lowercase">
-                            <div class="max-w-[75%] bg-violet-600 text-white px-4 py-3 rounded-2xl rounded-tr-sm shadow-sm shadow-violet-100">
-                                <p class="text-sm leading-relaxed">{{ $msg->text }}</p>
+                        <div class="flex justify-end animate-fade-in">
+                            <div class="w-fit max-w-[75%] bg-violet-600 text-white px-4 py-3 rounded-2xl rounded-tr-sm shadow-sm shadow-violet-100">
+                                <p class="text-sm leading-relaxed whitespace-pre-wrap">{{ $msg->text }}</p>
                             </div>
                         </div>
                     @else
-                        <div class="flex items-end gap-3 animate-fade-in lowercase">
+                        <div class="flex items-start gap-3 animate-fade-in">
                             <img src="{{ $msg->user && $msg->user->photo ? asset($msg->user->photo) : 'https://ui-avatars.com/api/?name='.urlencode($msg->username).'&background=f1f5f9&color=64748b&bold=true' }}" 
-                                 alt="{{ $msg->username }}" class="w-8 h-8 rounded-full border border-slate-200 mb-1 object-cover">
+                                 alt="{{ $msg->username }}" class="w-8 h-8 rounded-full border border-slate-200 mt-5 object-cover shrink-0">
                             <div class="max-w-[75%]">
-                                <span class="text-[10px] text-slate-400 font-bold ml-1 mb-1 block tracking-wide capitalize">{{ $msg->username }}</span>
-                                <div class="bg-white text-slate-800 px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm border border-slate-100">
-                                    <p class="text-sm leading-relaxed">{{ $msg->text }}</p>
+                                <span class="text-[10px] text-slate-400 font-bold ml-1 mb-1 block tracking-wide">{{ $msg->username }}</span>
+                                <div class="w-fit bg-white text-slate-800 px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm border border-slate-100">
+                                    <p class="text-sm leading-relaxed whitespace-pre-wrap">{{ $msg->text }}</p>
                                 </div>
                             </div>
                         </div>
@@ -247,17 +247,10 @@
 
                 if (isMe) {
                     newChat.className = 'flex justify-end mt-4 mb-4';
-                    newChat.innerHTML = `<div class="max-w-[75%] bg-violet-600 text-white px-4 py-3 rounded-2xl rounded-tr-sm shadow-sm"><p class="text-sm leading-relaxed">${e.message}</p></div>`;
+                    newChat.innerHTML = `<div class="w-fit max-w-[75%] bg-violet-600 text-white px-4 py-3 rounded-2xl rounded-tr-sm shadow-sm"><p class="text-sm leading-relaxed whitespace-pre-wrap">${e.message}</p></div>`;
                 } else {
-                    newChat.className = 'flex items-end gap-3 mt-4 mb-4';
-                    newChat.innerHTML = `
-                        <img src="${avatarUrl}" class="w-8 h-8 rounded-full border border-slate-200 mb-1 object-cover">
-                        <div class="max-w-[75%]">
-                            <span class="text-[10px] text-slate-400 font-bold ml-1 mb-1 block tracking-wide capitalize">${e.username}</span>
-                            <div class="bg-white text-slate-800 px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm border border-slate-100">
-                                <p class="text-sm leading-relaxed">${e.message}</p>
-                            </div>
-                        </div>`;
+                    newChat.className = 'flex items-start gap-3 mt-4 mb-4';
+                    newChat.innerHTML = `<img src="${avatarUrl}" class="w-8 h-8 rounded-full border border-slate-200 mt-5 object-cover shrink-0"><div class="max-w-[75%]"><span class="text-[10px] text-slate-400 font-bold ml-1 mb-1 block tracking-wide">${e.username}</span><div class="w-fit bg-white text-slate-800 px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm border border-slate-100"><p class="text-sm leading-relaxed whitespace-pre-wrap">${e.message}</p></div></div>`;
                 }
                 
                 chatBox.appendChild(newChat);

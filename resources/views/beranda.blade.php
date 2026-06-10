@@ -55,57 +55,9 @@
 
     <main class="mx-auto max-w-7xl px-4 py-8 pb-24 sm:px-6">
         <div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
-            
-            <aside class="hidden lg:col-span-3 lg:block">
-                <div class="sticky top-28 space-y-4">
-                    <nav class="space-y-1">
-                        <a href="/beranda" class="group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm transition-all {{ request()->is('beranda*') ? 'bg-violet-50 text-violet-700 font-bold' : 'text-slate-600 font-medium hover:bg-slate-100 hover:text-slate-900' }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {{ request()->is('beranda*') ? 'opacity-100' : 'opacity-70 group-hover:opacity-100' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                            Beranda
-                        </a>
+            @include('components.sidebar')
 
-                        <a href="/contacts" class="group flex items-center justify-between rounded-2xl px-4 py-3 text-sm transition-all {{ request()->is('contacts*') || request()->is('chat*') ? 'bg-violet-50 text-violet-700 font-bold' : 'text-slate-600 font-medium hover:bg-slate-100 hover:text-slate-900' }}">
-                            <div class="flex items-center gap-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {{ request()->is('contacts*') || request()->is('chat*') ? 'opacity-100' : 'opacity-70 group-hover:opacity-100' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                                Pesan
-                            </div>
-                        </a>
-
-                        <a href="/search" class="group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm transition-all {{ request()->is('search*') ? 'bg-violet-50 text-violet-700 font-bold' : 'text-slate-600 font-medium hover:bg-slate-100 hover:text-slate-900' }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {{ request()->is('search*') ? 'opacity-100' : 'opacity-70 group-hover:opacity-100' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                            Search
-                        </a>
-
-                        <a href="/notifications" class="group flex items-center justify-between rounded-2xl px-4 py-3 text-sm transition-all {{ request()->is('notifications*') ? 'bg-violet-50 text-violet-700 font-bold' : 'text-slate-600 font-medium hover:bg-slate-100 hover:text-slate-900' }}">
-                            <div class="flex items-center gap-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {{ request()->is('notifications*') ? 'opacity-100' : 'opacity-70 group-hover:opacity-100' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                </svg>
-                                Notifikasi
-                            </div>
-                            @php $unreadCount = auth()->user()->unreadNotificationsCount(); @endphp
-                            @if($unreadCount > 0)
-                                <span class="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white font-bold shadow-sm">
-                                    {{ $unreadCount }}
-                                </span>
-                            @endif
-                        </a>
-
-                        <a href="/leaderboard" class="group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm transition-all {{ request()->is('leaderboard*') ? 'bg-violet-50 text-violet-700 font-bold' : 'text-slate-600 font-medium hover:bg-slate-100 hover:text-slate-900' }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {{ request()->is('leaderboard*') ? 'opacity-100' : 'opacity-70 group-hover:opacity-100' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                            </svg>
-                            Leaderboard
-                        </a>
-
-                        <a href="/profile" class="group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm transition-all {{ request()->is('profile*') ? 'bg-violet-50 text-violet-700 font-bold' : 'text-slate-600 font-medium hover:bg-slate-100 hover:text-slate-900' }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {{ request()->is('profile*') ? 'opacity-100' : 'opacity-70 group-hover:opacity-100' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                            Profil
-                        </a>
-                    </nav>
-                </div>
-            </aside>
-                <section id="feedContainer" class="lg:col-span-6 space-y-8">
+            <section id="feedContainer" class="lg:col-span-6 space-y-8">
                     
                     @if(session('success'))
                         <div class="animate-fade-in flex items-center gap-3 rounded-[24px] border border-emerald-100 bg-emerald-50 p-4 text-sm font-bold text-emerald-700 shadow-sm">
@@ -157,7 +109,7 @@
                 </div>
             </section>
 
-            <aside class="hidden lg:col-span-3 lg:block"></aside>
+            @include('components.right-sidebar')
         </div>
     </main>
 
@@ -246,6 +198,21 @@
             </form>
         </div>
     </div>
+
+    <div id="editPostModal" class="fixed inset-0 z-[80] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all">
+        <div class="w-full max-w-lg rounded-[32px] bg-white p-8 shadow-2xl transform transition-all scale-95 opacity-0 duration-200" id="editModalContent">
+            <h3 class="text-xl font-bold mb-6 text-slate-900">Edit Caption Postingan</h3>
+            
+            <input type="hidden" id="editPostId">
+            
+            <textarea id="editCaptionText" rows="4" class="w-full rounded-2xl border border-slate-200 p-4 text-sm outline-none focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all bg-slate-50 custom-scrollbar" placeholder="Tulis ulang caption lu di sini..."></textarea>
+            
+            <div class="mt-6 flex gap-3">
+                <button onclick="closeEditModal()" class="w-full rounded-2xl bg-slate-100 py-3.5 text-sm font-bold text-slate-600 hover:bg-slate-200 transition-all">Batal</button>
+                <button onclick="saveEditPost()" id="btnSaveEdit" class="w-full rounded-2xl bg-violet-600 py-3.5 text-sm font-bold text-white hover:bg-violet-700 transition-all shadow-lg shadow-violet-200 active:scale-95">Simpan Perubahan</button>
+            </div>
+        </div>
+    </div>
     <script>
         // Variabel global buat nentuin lagi di tab mana
         let currentFeedType = 'portfolio';
@@ -318,7 +285,7 @@
         function renderPost(post) {
             globalPostsData[post.id] = post;
             const article = document.createElement('article');
-            article.className = 'card-hover overflow-hidden rounded-[32px] border border-slate-200 bg-white mb-6';
+            article.className = 'card-hover rounded-[32px] border border-slate-200 bg-white mb-6';
             article.id = `post-${post.id}`;
             
             const userName = post.user?.name || 'User';
@@ -345,16 +312,13 @@
             // Logika Banner Gabung Kelas
             let roomBannerHtml = '';
             if (post.room_id && post.room) {
-                // Cek apakah user udah gabung kelas ini
                 let isJoined = false;
                 if (post.user_id === currentUserId) {
-                    isJoined = true; // Kalo dia yang upload, pasti dia yang punya kelas
+                    isJoined = true; 
                 } else if (post.room.users) {
-                    // Cek apakah id user ada di daftar member kelas
                     isJoined = post.room.users.some(u => u.id === currentUserId);
                 }
 
-                // Bikin Tombol Sesuai Status
                 let buttonHtml = '';
                 if (isJoined) {
                     buttonHtml = `
@@ -390,17 +354,38 @@
             }
 
             article.innerHTML = `
-                <div class="flex items-center gap-3 p-5">
-                    <a href="/profile/${post.user?.id}" class="shrink-0 transition-transform hover:scale-105">
-                        <img src="${userPhoto}" class="h-11 w-11 rounded-full ring-2 ring-violet-50" />
-                    </a>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <a href="/profile/${post.user?.id}" class="text-sm font-bold text-slate-900 hover:text-violet-600 hover:underline transition-colors">${userName}</a> ${roleBadge}
-                            ${post.type === 'learning' && post.category ? `<span class="bg-violet-100 text-violet-700 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ml-1">${post.category.name}</span>` : ''}
+                <div class="flex items-start justify-between p-5">
+                    <div class="flex items-center gap-3">
+                        <a href="/profile/${post.user?.id}" class="shrink-0 transition-transform hover:scale-105">
+                            <img src="${userPhoto}" class="h-11 w-11 rounded-full ring-2 ring-violet-50 object-cover" />
+                        </a>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <a href="/profile/${post.user?.id}" class="text-sm font-bold text-slate-900 hover:text-violet-600 hover:underline transition-colors">${userName}</a> ${roleBadge}
+                                ${post.type === 'learning' && post.category ? `<span class="bg-violet-100 text-violet-700 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ml-1">${post.category.name}</span>` : ''}
+                            </div>
+                            <p class="text-[11px] text-slate-400 uppercase font-medium">${formatTimeAgo(post.created_at)}</p>
                         </div>
-                        <p class="text-[11px] text-slate-400 uppercase font-medium">${formatTimeAgo(post.created_at)}</p>
                     </div>
+
+                    ${post.user_id === currentUserId ? `
+                    <div class="relative shrink-0 ml-4">
+                        <button onclick="togglePostMenu(${post.id})" class="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                            </svg>
+                        </button>
+                        
+                        <div id="post-menu-${post.id}" class="hidden absolute right-0 mt-1 w-36 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden py-1">
+                            <button onclick="editPost(${post.id})" class="w-full text-left px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-violet-600 transition-colors flex items-center gap-2">
+                                <span>✏️</span> Edit
+                            </button>
+                            <button onclick="deletePost(${post.id})" class="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2 border-t border-slate-50">
+                                <span>🗑️</span> Hapus
+                            </button>
+                        </div>
+                    </div>
+                    ` : ''} 
                 </div>
 
                 <div class="px-5 pb-4 text-sm text-slate-700 leading-relaxed">${post.content}</div>
@@ -757,6 +742,137 @@
                 alert("Waduh, upload gagal!");
             } finally {
                 btn.innerText = "Upload Materi Sekarang";
+                btn.disabled = false;
+            }
+        }
+
+        // Buka/Tutup Dropdown Menu Titik Tiga
+        function togglePostMenu(id) {
+            const menu = document.getElementById(`post-menu-${id}`);
+            menu.classList.toggle('hidden');
+        }
+
+        // Kalau sembarang tempat diklik, menu titik tiganya otomatis ketutup
+        document.addEventListener('click', function(event) {
+            const isClickInsideMenu = event.target.closest('[id^="post-menu-"]');
+            const isClickOnButton = event.target.closest('button[onclick^="togglePostMenu"]');
+            
+            if (!isClickInsideMenu && !isClickOnButton) {
+                document.querySelectorAll('[id^="post-menu-"]').forEach(menu => {
+                    menu.classList.add('hidden');
+                });
+            }
+        });
+
+        // Fitur Hapus Postingan (AJAX, Mulus tanpa Reload)
+        async function deletePost(id) {
+            if(!confirm('Beneran mau hapus postingan ini, beb? Nggak bisa di-undo lho.')) return;
+            
+            try {
+                const response = await fetch(`/posts/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                if(result.success) {
+                    // Hapus kartu postingan dari layar!
+                    const postCard = document.getElementById(`post-${id}`);
+                    postCard.style.transform = 'scale(0.9)';
+                    postCard.style.opacity = '0';
+                    setTimeout(() => postCard.remove(), 300);
+                } else {
+                    alert('Gagal hapus: ' + result.message);
+                }
+            } catch(e) {
+                alert('Gagal kontak server, beb.');
+            }
+        }
+
+        // --- FITUR EDIT POSTINGAN ---
+        
+        // 1. Buka Modal & Isi Teks Lama
+        function editPost(id) {
+            const post = globalPostsData[id];
+            if(!post) return alert('Waduh, data postingan ilang dari memori beb!');
+
+            // Masukin data ke form modal
+            document.getElementById('editPostId').value = id;
+            document.getElementById('editCaptionText').value = post.content;
+            
+            // Munculin modal pake animasi
+            const modal = document.getElementById('editPostModal');
+            const modalContent = document.getElementById('editModalContent');
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
+            
+            // Tutup dropdown titik 3-nya
+            togglePostMenu(id);
+        }
+
+        // 2. Tutup Modal
+        function closeEditModal() {
+            const modal = document.getElementById('editPostModal');
+            const modalContent = document.getElementById('editModalContent');
+            
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        // 3. Tembak AJAX buat nyimpen Edit
+        async function saveEditPost() {
+            const id = document.getElementById('editPostId').value;
+            const newContent = document.getElementById('editCaptionText').value.trim();
+            const btn = document.getElementById('btnSaveEdit');
+
+            if(!newContent) return alert('Caption nggak boleh kosong dong beb, masa sepi amat!');
+
+            btn.innerText = 'Menyimpan...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`/posts/${id}`, {
+                    method: 'PUT', // Pake metode PUT buat update data
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ content: newContent })
+                });
+
+                const result = await response.json();
+                
+                if(result.success) {
+                    globalPostsData[id].content = newContent;
+                
+                    const postCard = document.getElementById(`post-${id}`);
+                    const contentDiv = postCard.querySelector('.px-5.pb-4.text-sm.text-slate-700.leading-relaxed');
+                    if(contentDiv) {
+                        contentDiv.innerText = newContent;
+                        contentDiv.classList.add('bg-yellow-100', 'transition-colors', 'duration-500');
+                        setTimeout(() => contentDiv.classList.remove('bg-yellow-100'), 500);
+                    }
+
+                    closeEditModal();
+                } else {
+                    alert('Gagal update: ' + result.message);
+                }
+            } catch(e) {
+                alert('Gagal terhubung ke server nih.');
+            } finally {
+                btn.innerText = 'Simpan Perubahan';
                 btn.disabled = false;
             }
         }
