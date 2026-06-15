@@ -8,8 +8,13 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\AiMentorController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\LeaderboardController;
 
-// --- ZONA BEBAS ---
+// =========================================================================
+// --- ZONA BEBAS (Akses Tanpa Login) ---
+// =========================================================================
 Route::get('/', function () {
     return view('landing');
 })->name('landing');
@@ -25,13 +30,26 @@ Route::get('/register', function () {
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
-// --- ZONA SATPAM (Wajib Login) ---
+
+// =========================================================================
+// --- ZONA SATPAM (Wajib Login / Middleware Auth) ---
+// =========================================================================
 Route::middleware('auth')->group(function () {
     
     // 1. Rute Beranda & Kontak
     Route::get('/beranda', function() {
         return view('beranda');
     })->name('beranda');
+
+    // TAMBAHKAN BARIS INI BIAR NGGAK 404 LAGI:
+    Route::get('/feed', function () {
+        return view('feed');
+    })->name('feed');
+
+    // Rute Tampilan Form Upload Karya
+    Route::get('/upload-karya', function() {
+        return view('upload');
+    })->name('upload.karya');
     
     Route::get('/contacts', [ChatController::class, 'contactList']);
     Route::get('/search', [UserController::class, 'search']);
@@ -42,13 +60,15 @@ Route::middleware('auth')->group(function () {
     Route::post('/posts/{id}/comment', [PostController::class, 'storeComment']);
     Route::post('/posts/{id}/like', [PostController::class, 'toggleLike']);
     Route::get('/api/posts/{id}', [PostController::class, 'show']);
-    Route::post('/assignments', [App\Http\Controllers\ChatController::class, 'storeAssignment']);
-    Route::post('/submissions', [App\Http\Controllers\ChatController::class, 'storeSubmission']);
-    Route::post('/submissions/{id}/grade', [App\Http\Controllers\ChatController::class, 'gradeSubmission']);
     Route::delete('/posts/{id}', [PostController::class, 'destroy']);
     Route::put('/posts/{id}', [PostController::class, 'update']);
+    
+    // Rute Tugas & Pengumpulan (Submissions)
+    Route::post('/assignments', [ChatController::class, 'storeAssignment']);
+    Route::post('/submissions', [ChatController::class, 'storeSubmission']);
+    Route::post('/submissions/{id}/grade', [ChatController::class, 'gradeSubmission']);
 
-    // 3. === RUTE CHAT ===
+    // 3. === RUTE CHAT & KELOMPOK ===
     Route::get('/chat/private/{targetUserId}', [ChatController::class, 'createOrFindPrivateChat']);
     Route::get('/chat/{roomId}', [ChatController::class, 'index']);
     Route::post('/chat/send', [ChatController::class, 'store']);
@@ -60,43 +80,41 @@ Route::middleware('auth')->group(function () {
     Route::get('/chat/group/{roomId}/info', [ChatController::class, 'groupInfo'])->name('chat.group.info');
     Route::post('/chat/group/{roomId}/update', [ChatController::class, 'updateGroup'])->name('chat.group.update');
     Route::post('/chat/group/{roomId}/invite', [ChatController::class, 'inviteToGroup'])->name('chat.group.invite');
-    Route::post('/chat/group/{id}/update', [App\Http\Controllers\ChatController::class, 'updateGroup'])->name('chat.group.update');
 
-    // Rute Baru AI Mentor dengan Fitur History
-    Route::get('/ai-mentor', [App\Http\Controllers\AiMentorController::class, 'index']);
-    Route::post('/ai-mentor/ask', [App\Http\Controllers\AiMentorController::class, 'ask']);
-    Route::post('/ai-mentor/pin/{id}', [App\Http\Controllers\AiMentorController::class, 'togglePin']);
-    Route::delete('/ai-mentor/delete/{id}', [App\Http\Controllers\AiMentorController::class, 'deleteChat']);
+    // 4. === RUTE AI MENTOR dengan Fitur History ===
+    Route::get('/ai-mentor', [AiMentorController::class, 'index']);
+    Route::post('/ai-mentor/ask', [AiMentorController::class, 'ask']);
+    Route::post('/ai-mentor/pin/{id}', [AiMentorController::class, 'togglePin']);
+    Route::delete('/ai-mentor/delete/{id}', [AiMentorController::class, 'deleteChat']);
 
-
-    // 4. === RUTE PROFIL ===
+    // 5. === RUTE PROFIL ===
     
-    // Rute buat nampilin form edit profil 
+    // Rute menampilkan form edit profil 
     Route::get('/profile/edit', function () {
         $user = Auth::user();
         return view('addprofile', compact('user'));
     })->name('profile.edit');
 
-    // Rute buat nyimpen data edit profil (Ngambil dari UserController)
+    // Rute menyimpan data edit profil (Diolah di UserController)
     Route::post('/profile/edit', [UserController::class, 'updateProfile'])->name('profile.update');
 
-    // Rute profil diri sendiri (Nggak pake ID)
+    // Rute profil diri sendiri (Otomatis mengambil User Login)
     Route::get('/profile', function () {
-        // Pake withCount juga di sini biar angkanya kebawa!
         $user = User::withCount(['followers', 'followings', 'posts'])->find(Auth::id());
         return view('profile', compact('user'));
     })->name('profile.me');
 
-    // Rute profil orang lain (Pake ID)
+    // Rute profil pengguna lain berdasarkan ID
     Route::get('/profile/{id}', [UserController::class, 'showProfile'])->name('profile.show');
 
-    // --- TAMBAHIN RUTE INI BUAT TOMBOL FOLLOW ---
+    // Rute interaksi tombol follow/unfollow
     Route::post('/profile/{id}/follow', [UserController::class, 'toggleFollow']);
 
-    // 5. Rute Notifikasi
-    Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    // 6. === RUTE NOTIFIKASI ===
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     
-    // 6. RUTE LEADERBOARD
-    Route::get('/leaderboard', [App\Http\Controllers\LeaderboardController::class, 'index']);
-    Route::get('/leaderboard/data', [App\Http\Controllers\LeaderboardController::class, 'getData']);
+    // 7. === RUTE LEADERBOARD ===
+    Route::get('/leaderboard', [LeaderboardController::class, 'index']);
+    Route::get('/leaderboard/data', [LeaderboardController::class, 'getData']);
+    
 });

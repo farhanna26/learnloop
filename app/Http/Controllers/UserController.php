@@ -75,15 +75,18 @@ class UserController extends Controller
         ]);
     }
 
-    // === FUNGSI SIMPAN EDIT PROFIL (FOTO & BANNER) ===
+    // === FUNGSI SIMPAN EDIT PROFIL (FOTO, BANNER, SOSMED, & KOORDINAT) ===
     public function updateProfile(Request $request)
     {
         $user = auth()->user();
         
+        // Tambahkan validasi untuk linkedin dan portfolio
         $validated = $request->validate([
             'description' => 'nullable|string|max:500',
-            'photo' => 'nullable|image|max:3072',
-            'banner' => 'nullable|image|max:3072', 
+            'linkedin'    => 'nullable|url',
+            'portfolio'   => 'nullable|url',
+            'photo'       => 'nullable|image|max:3072',
+            'banner'      => 'nullable|image|max:3072', 
         ]);
 
         if ($request->hasFile('photo')) {
@@ -100,7 +103,17 @@ class UserController extends Controller
             $user->banner = 'profile-banners/' . $filename;
         }
 
+        // PERBAIKAN: Masukkan data sosial media dan data koordinat agar tersimpan ke database
         $user->description = $validated['description'];
+        $user->linkedin    = $validated['linkedin'];
+        $user->portfolio   = $validated['portfolio'];
+        
+        // Menangkap data pergeseran posisi gambar dari form slider
+        $user->banner_x    = $request->input('banner_x', 50);
+        $user->banner_y    = $request->input('banner_y', 50);
+        $user->photo_x     = $request->input('photo_x', 50);
+        $user->photo_y     = $request->input('photo_y', 50);
+
         $user->save();
 
         return redirect('/profile')->with('success', 'Berhasil Edit Profile');
