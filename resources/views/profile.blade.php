@@ -173,7 +173,11 @@
                 <div class="px-6 mt-4 pb-6">
                     <div class="flex items-center gap-2.5">
                         <h1 class="text-xl font-black text-purple-950 dark:text-white tracking-tight">{{ $user->name }}</h1>
-                        <span class="bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">{{ $user->role ?? 'Learner' }}</span>
+                        @if(($user->role ?? 'learner') === 'creator')
+                            <span class="bg-violet-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">{{ ucfirst($user->role) }}</span>
+                        @else
+                            <span class="bg-slate-200 text-slate-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">{{ ucfirst($user->role ?? 'Learner') }}</span>
+                        @endif
                     </div>
                     <p class="text-xs font-bold text-slate-400 mt-0.5">{{ $user->email }}</p>
                     
@@ -243,7 +247,7 @@
                     <div class="space-y-3">
                         @forelse($friends as $friend)
                             <div class="item-user-clean p-2.5 rounded-2xl flex items-center justify-between">
-                                <a href="/profile/{{ $friend->id }}" class="flex items-center gap-3 overflow-hidden flex-1">
+                                <a href="/profile/{{ $friend->id }}" class="flex items-center gap-3 flex-1">
                                     <div class="relative shrink-0">
                                         <img src="{{ $friend->photo ? asset($friend->photo) : 'https://ui-avatars.com/api/?name='.urlencode($friend->name).'&background=8b5cf6&color=ffffff' }}" class="h-11 w-11 rounded-full object-cover">
                                         <div class="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-slate-300 border-2 border-white dark:border-[#161245]"></div>
@@ -261,11 +265,11 @@
                 </div>
 
                 <div class="sidebar-content-box p-6 shrink-0">
-                    <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-purple-300/40 mb-4">Top Kreator</h3>
+                    <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-purple-300/40 mb-4">Top Creator</h3>
                     <div class="space-y-3">
                         @forelse($topCreators as $creator)
                             <div class="item-user-clean p-2.5 rounded-2xl flex items-center justify-between">
-                                <a href="/profile/{{ $creator->id }}" class="flex items-center gap-3 overflow-hidden flex-1">
+                                <a href="/profile/{{ $creator->id }}" class="flex items-center gap-3 flex-1">
                                     <div class="relative shrink-0">
                                         <img src="{{ $creator->photo ? asset($creator->photo) : 'https://ui-avatars.com/api/?name='.urlencode($creator->name).'&background=8b5cf6&color=ffffff' }}" class="h-11 w-11 rounded-full object-cover">
                                         <div class="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-slate-300 border-2 border-white dark:border-[#161245]"></div>
@@ -277,7 +281,7 @@
                                 </a>
                             </div>
                         @empty
-                            <p class="text-xs text-slate-400/80 font-medium italic text-center py-4">Belum ada kreator rekomendasi.</p>
+                            <p class="text-xs text-slate-400/80 font-medium italic text-center py-4">Belum ada creator rekomendasi.</p>
                         @endforelse
                     </div>
                 </div>
@@ -411,8 +415,8 @@
         const userPhoto = post.user?.photo ? `/${post.user.photo}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=8b5cf6&color=ffffff`;
 
         let roleBadge = post.user?.role === 'creator' 
-            ? `<span class="bg-violet-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full ml-2 align-middle shadow-sm">Creator</span>` 
-            : `<span class="bg-slate-200 text-slate-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full ml-2 align-middle shadow-sm">Learner</span>`;
+            ? `<span class="bg-violet-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full ml-2 align-middle shadow-sm uppercase tracking-wider">Creator</span>` 
+            : `<span class="bg-slate-200 text-slate-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full ml-2 align-middle shadow-sm uppercase tracking-wider">Learner</span>`;
             
         const isVideo = post.image?.match(/\.(mp4|webm|ogg|mov)$/i);
         const isImage = post.image?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
@@ -657,8 +661,8 @@
     function appendCommentToUI(comment, isReply = false) {
         const userName = comment.user?.name || 'User';
         let roleBadgeComment = comment.user?.role === 'creator' 
-            ? `<span class="bg-violet-600 text-white text-[8px] font-bold px-2 py-0.5 rounded-full ml-1.5 shadow-sm">Creator</span>` 
-            : `<span class="bg-slate-200 text-slate-600 text-[8px] font-bold px-2 py-0.5 rounded-full ml-1.5 shadow-sm">Learner</span>`;
+            ? `<span class="bg-violet-600 text-white text-[8px] font-bold px-2 py-0.5 rounded-full ml-1.5 shadow-sm uppercase tracking-wider">Creator</span>` 
+            : `<span class="bg-slate-200 text-slate-600 text-[8px] font-bold px-2 py-0.5 rounded-full ml-1.5 shadow-sm uppercase tracking-wider">Learner</span>`;
         const commenterPhoto = comment.user?.photo ? `/${comment.user.photo}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=e2e8f0`;
         const noDataHtml = commentsList.querySelector('p.text-slate-400');
         if (noDataHtml) noDataHtml.remove();

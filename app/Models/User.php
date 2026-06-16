@@ -66,7 +66,7 @@ class User extends Authenticatable
         // Jika tidak ada user yang dikirim, otomatis return false
         if (!$user) return false; 
         
-        return $this->followers()->where('follower_id', $user->id)->exists();
+        return $this->followings()->where('followed_id', $user->id)->exists();
     }
 
     // TAMBAHAN BARU: Relasi ke tabel posts biar bisa ngitung jumlah postingan

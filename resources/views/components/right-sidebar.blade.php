@@ -7,12 +7,9 @@
     $friendsQuery = $user->followings();
     $friends = $friendsQuery->inRandomOrder()->take(5)->get();
 
-    $creatorsQuery = \App\Models\User::where('id', '!=', $user->id)
+    $topCreators = \App\Models\User::where('id', '!=', $user->id)
         ->where('role', 'creator')
-        ->whereDoesntHave('followers', function ($query) use ($user) {
-            $query->where('follower_id', $user->id);
-        });
-    $topCreators = $creatorsQuery->withCount('posts')
+        ->withCount('posts')
         ->orderByDesc('posts_count')
         ->take(5)
         ->get();
@@ -68,7 +65,11 @@
         <div class="px-5 pb-6 text-center -mt-11 relative z-10">
             <img src="{{ $photoUrl }}" class="h-20 w-20 rounded-2xl object-cover mx-auto border-4 border-white dark:border-[#15103a] shadow-md" />
             <h2 class="mt-2.5 font-black text-sm text-purple-950 dark:text-white truncate tracking-tight">{{ $userName }}</h2>
-            <span class="text-[9px] bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 font-black px-3 py-0.5 rounded-full inline-block uppercase mt-1 border border-purple-100/50">{{ $user->role ?? 'Learner' }}</span>
+            @if(($user->role ?? 'learner') === 'creator')
+                <span class="text-[10px] bg-violet-600 text-white font-bold px-2.5 py-0.5 rounded-full inline-block uppercase mt-1 shadow-sm">{{ ucfirst($user->role) }}</span>
+            @else
+                <span class="text-[10px] bg-slate-200 text-slate-600 font-bold px-2.5 py-0.5 rounded-full inline-block uppercase mt-1 shadow-sm">{{ ucfirst($user->role ?? 'Learner') }}</span>
+            @endif
             <div class="mt-4">
                 <a href="/profile" class="w-full text-[10px] font-black uppercase tracking-wider text-white btn-pop-pill py-3 rounded-2xl block text-center">
                     👤 Profile
@@ -85,8 +86,8 @@
                     $friendPhoto = $friend->photo ? asset($friend->photo) : 'https://ui-avatars.com/api/?name='.urlencode($friend->name).'&background=10b981&color=ffffff&rounded=true';
                 @endphp
                 <div class="flex items-center justify-between group bg-purple-50/40 dark:bg-[#0d0926] p-2 rounded-2xl border border-purple-100/10">
-                    <a href="/profile/{{ $friend->id }}" class="flex items-center gap-2.5 cursor-pointer overflow-hidden flex-1">
-                        <div class="relative shrink-0">
+                    <a href="/profile/{{ $friend->id }}" class="flex items-center gap-2.5 cursor-pointer flex-1">
+                        <div class="relative shrink-0 overflow-visible">
                             <img src="{{ $friendPhoto }}" class="h-9 w-9 rounded-xl object-cover border border-slate-100">
                             <div class="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full bg-slate-300 border-2 border-white dark:border-[#15103a]"></div>
                         </div>
@@ -109,18 +110,19 @@
                 @php
                     $creatorPhoto = $creator->photo ? asset($creator->photo) : 'https://ui-avatars.com/api/?name='.urlencode($creator->name).'&background=3b82f6&color=ffffff&rounded=true';
                 @endphp
-                <div class="flex items-center justify-between group bg-purple-50/40 dark:bg-[#0d0926] p-2 rounded-2xl border border-purple-100/10">
-                    <a href="/profile/{{ $creator->id }}" class="flex items-center gap-2.5 cursor-pointer overflow-hidden flex-1">
+                <div id="creator-item-{{ $creator->id }}" class="flex items-center justify-between group bg-purple-50/40 dark:bg-[#0d0926] p-2 rounded-2xl border border-purple-100/10 transition-all">
+                    <a href="/profile/{{ $creator->id }}" class="flex items-center gap-2.5 cursor-pointer flex-1">
                         <img src="{{ $creatorPhoto }}" class="h-9 w-9 rounded-xl object-cover border border-slate-100">
                         <div class="overflow-hidden">
                             <p class="text-xs font-black text-purple-950 dark:text-slate-200 truncate group-hover:text-purple-600 transition-colors leading-tight">{{ $creator->name }}</p>
                             <p class="text-[9px] font-bold text-purple-400/80 truncate">{{ $creator->posts_count ?? 0 }} Modul</p>
                         </div>
                     </a>
-                    <button class="text-white btn-pop-pill text-[9px] uppercase tracking-wider font-black px-4 py-2 rounded-xl shrink-0">Ikuti</button>
+                    @php $isFollowingCreator = $user->isFollowing($creator); @endphp
+                    <button id="follow-creator-btn-{{ $creator->id }}" onclick="handleCreatorFollow({{ $creator->id }})" class="text-[9px] uppercase tracking-wider font-black px-4 py-2 rounded-xl shrink-0 transition-all active:scale-95 {{ $isFollowingCreator ? 'bg-slate-200 text-slate-600' : 'text-white btn-pop-pill' }}">{{ $isFollowingCreator ? 'Following' : 'Ikuti' }}</button>
                 </div>
             @empty
-                <p class="text-xs text-slate-400 italic text-center py-2">Belum ada kreator rekomendasi.</p>
+                <p class="text-xs text-slate-400 italic text-center py-2">Belum ada creator rekomendasi.</p>
             @endforelse
         </div>
     </div>
@@ -134,3 +136,38 @@
         </form>
     </div>
 </aside>
+
+<script>
+    async function handleCreatorFollow(creatorId) {
+        const btn = document.getElementById(`follow-creator-btn-${creatorId}`);
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+        if (!csrfToken) return;
+        btn.disabled = true;
+        const prevText = btn.innerText;
+        btn.innerText = '...';
+
+        try {
+            const response = await fetch(`/profile/${creatorId}/follow`, {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                if (result.is_following) {
+                    btn.innerText = 'Following';
+                    btn.className = 'text-[9px] uppercase tracking-wider font-black px-4 py-2 rounded-xl shrink-0 transition-all active:scale-95 bg-slate-200 text-slate-600';
+                } else {
+                    btn.innerText = 'Follow';
+                    btn.className = 'text-[9px] uppercase tracking-wider font-black px-4 py-2 rounded-xl shrink-0 transition-all active:scale-95 text-white btn-pop-pill';
+                }
+            }
+        } catch (error) {
+            console.error('Follow gagal:', error);
+            btn.innerText = prevText;
+        } finally {
+            btn.disabled = false;
+        }
+    }
+</script>

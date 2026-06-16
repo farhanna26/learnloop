@@ -65,6 +65,16 @@
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
         .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #2e2773; }
+
+        /* --- CHAT WALLPAPER PATTERN (Isometric Cubes) --- */
+        .chat-wallpaper {
+            background-color: #fafbfc;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='103.923048' viewBox='0 0 60 103.923048' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23e2e8f0' stroke-width='1.5' opacity='0.7'%3E%3Cpath d='M30,0 v34.641016 l29.999999,17.320508' /%3E%3Cpath d='M30,34.641016 L0,17.320508' /%3E%3Cpath d='M0,51.961524 l30,17.320508 v34.641016' /%3E%3Cpath d='M30,69.282032 l30,-17.320508' /%3E%3C/g%3E%3C/svg%3E");
+        }
+        .dark .chat-wallpaper {
+            background-color: #0b0822;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='103.923048' viewBox='0 0 60 103.923048' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%231e1b4b' stroke-width='1.5' opacity='0.8'%3E%3Cpath d='M30,0 v34.641016 l29.999999,17.320508' /%3E%3Cpath d='M30,34.641016 L0,17.320508' /%3E%3Cpath d='M0,51.961524 l30,17.320508 v34.641016' /%3E%3Cpath d='M30,69.282032 l30,-17.320508' /%3E%3C/g%3E%3C/svg%3E");
+        }
     </style>
 </head>
 <body class="h-screen w-screen bg-[#f0f2fe] dark:bg-[#060412] text-[#1e1b4b] dark:text-[#f3f1fa] antialiased font-sans p-3 md:p-6 flex items-center justify-center overflow-hidden transition-colors duration-300">
@@ -124,7 +134,7 @@
 
         <!-- AREA 1: KOTAK UTAMA OBROLAN -->
         <div id="area-obrolan" class="flex flex-col flex-1 overflow-hidden bg-white dark:bg-[#110d35] rounded-b-[2.5rem] border-x-2 border-b-2 border-slate-200/60 dark:border-slate-800/60">
-            <div id="chat-box" class="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/40 dark:bg-[#0e0a2f]/20 custom-scrollbar flex flex-col-reverse">
+            <div id="chat-box" class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar flex flex-col-reverse chat-wallpaper">
                 <div class="space-y-6 flex flex-col w-full">
                     @foreach($messages as $msg)
                         @if($msg->username === Auth::user()->name)

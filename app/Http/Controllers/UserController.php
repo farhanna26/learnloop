@@ -53,24 +53,31 @@ class UserController extends Controller
 
         if ($user->isFollowing($targetUser)) {
             $user->followings()->detach($targetUser->id);
+            $status = 'unfollowed';
             $isFollowing = false;
             
             // (Opsional) Lu bisa hapus notifnya kalau dia unfollow, tapi biasanya dibiarin aja
         } else {
             $user->followings()->attach($targetUser->id);
+            $status = 'followed';
             $isFollowing = true;
 
             // --- INI LOGIKA NOTIFIKASINYA ---
-            \App\Models\Notification::create([
-                'user_id' => $targetUser->id, // Target (Miss Zaychik)
-                'sender_id' => $user->id,      // Pelaku (Farhan)
-                'type' => 'follow',            // Jenisnya
-                'is_read' => false
-            ]);
+            try {
+                \App\Models\Notification::create([
+                    'user_id' => $targetUser->id, // Target (Miss Zaychik)
+                    'sender_id' => $user->id,      // Pelaku (Farhan)
+                    'type' => 'follow',            // Jenisnya
+                    'is_read' => false
+                ]);
+            } catch (\Exception $e) {
+                // Kalau notifikasi gagal, follow tetap jalan
+            }
         }
 
         return response()->json([
             'success' => true,
+            'status' => $status,
             'is_following' => $isFollowing
         ]);
     }
