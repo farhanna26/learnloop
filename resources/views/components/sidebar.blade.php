@@ -1,5 +1,26 @@
 @php
     $user = Auth::user();
+    
+    // CEK PESAN BARU (SEKARANG UDAH REAL-TIME!)
+    $hasNewMessage = \App\Models\Message::where('username', '!=', $user->name)
+        ->where('is_read', false)
+        ->exists();
+
+    if($hasNewMessage) {
+        $unreadRoomId = \App\Models\Message::where('is_read', false)->pluck('room_id')->first();
+        \Log::info('Titik merah nyala karena pesan di room ID: ' . $unreadRoomId);
+    }
+    // 2. CEK NOTIFIKASI YANG BELUM DIBACA
+    $hasNewNotif = false;
+    try {
+        // Ngecek ke tabel notifications khusus buat user ini yang 'is_read'-nya masih 0 (false)
+        $hasNewNotif = \Illuminate\Support\Facades\DB::table('notifications')
+            ->where('user_id', $user->id)
+            ->where('is_read', 0)
+            ->exists();
+    } catch (\Exception $e) {
+        $hasNewNotif = false; 
+    }
 @endphp
 
 <style>
@@ -52,7 +73,10 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                     Pesan
                 </div>
-                <span class="bg-gradient-to-r from-pink-500 to-rose-500 text-white text-[9px] px-2 py-0.5 rounded-xl border border-rose-700 shadow-sm font-black">2</span>
+                
+                @if($hasNewMessage)
+                    <span class="h-2.5 w-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)] animate-pulse"></span>
+                @endif
             </a>
 
             <a href="/search" class="group flex items-center gap-3 rounded-2xl px-4 py-3.5 {{ request()->is('search*') ? 'btn-nav-active' : 'btn-nav-flat' }}">
@@ -65,7 +89,10 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
                     Notifikasi
                 </div>
-                <span class="bg-amber-400 text-purple-950 text-[9px] px-2 py-0.5 rounded-xl border border-amber-600 shadow-sm font-black animate-pulse">3</span>
+
+                @if($hasNewNotif)
+                    <span class="h-2.5 w-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)] animate-pulse"></span>
+                @endif
             </a>
 
             <a href="/leaderboard" class="group flex items-center gap-3 rounded-2xl px-4 py-3.5 {{ request()->is('leaderboard*') ? 'btn-nav-active' : 'btn-nav-flat' }}">

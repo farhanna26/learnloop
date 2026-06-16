@@ -396,19 +396,21 @@
         
         const title    = document.getElementById('tugasTitle').value;
         const desc     = document.getElementById('tugasDesc').value;
-        const deadline = document.getElementById('tugasDeadline').value;
+        const deadlineInput = document.getElementById('tugasDeadline').value;
         const file     = document.getElementById('tugasFile').files[0];
         const btn      = document.getElementById('btnSubmitTugas');
 
         btn.innerText = "Menerbitkan...";
         btn.disabled  = true;
 
+        const formattedDeadline = deadlineInput.replace('T', ' ') + ':00';
+
         const formData = new FormData();
         formData.append('room_id', '{{ $room->id }}');
         formData.append('title', title);
         formData.append('description', desc);
-        formData.append('deadline', deadline);
-        if (file) formData.append('file_path', file);
+        formData.append('deadline', formattedDeadline); // Kirim yang udah di-format
+        if (file) formData.append('file_path', file);;
 
         try {
             const response = await fetch('/assignments', {

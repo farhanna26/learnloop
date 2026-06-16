@@ -86,18 +86,14 @@
                     @foreach($activeChat->messages as $msg)
                         @if($msg->role === 'user')
                             <!-- Chat User -->
-                            <div class="flex justify-end">
-                                <div class="max-w-[75%] bg-purple-600 text-white px-4 py-2.5 rounded-2xl rounded-tr-sm shadow-sm text-xs font-medium whitespace-pre-wrap">
-                                    {{ $msg->content }}
-                                </div>
+                            <div class="flex justify-end animate-fade-in">
+                                <div class="w-fit max-w-[75%] bg-purple-600 text-white px-4 py-2.5 rounded-2xl rounded-tr-sm shadow-sm text-xs font-medium whitespace-pre-wrap">{{ $msg->content }}</div>
                             </div>
                         @else
                             <!-- Chat AI -->
-                            <div class="flex items-start gap-2.5">
+                            <div class="flex items-start gap-2.5 animate-fade-in">
                                 <div class="h-7 w-7 bg-gradient-to-tr from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center text-white text-[10px] font-black shrink-0 shadow-sm">AI</div>
-                                <div class="max-w-[80%] bg-white dark:bg-[#161245] border border-slate-200 dark:border-slate-800 px-4 py-2.5 rounded-2xl rounded-tl-sm shadow-sm text-xs text-slate-800 dark:text-slate-200 font-medium markdown-body">
-                                    <script>document.write(marked.parse({!! json_encode($msg->content) !!}));</script>
-                                </div>
+                                <div class="w-fit max-w-[80%] bg-white dark:bg-[#161245] border border-slate-200 dark:border-slate-800 px-4 py-2.5 rounded-2xl rounded-tl-sm shadow-sm text-xs text-slate-800 dark:text-slate-200 font-medium markdown-body"><script>document.write(marked.parse({!! json_encode($msg->content) !!}));</script></div>
                             </div>
                         @endif
                     @endforeach
@@ -106,7 +102,7 @@
                     <div class="flex items-start gap-2.5" id="welcome-message">
                         <div class="h-7 w-7 bg-gradient-to-tr from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center text-white text-[10px] font-black shrink-0 shadow-sm">AI</div>
                         <div class="max-w-[80%] bg-white dark:bg-[#161245] border border-slate-200 dark:border-slate-800 px-4 py-2.5 rounded-2xl rounded-tl-sm shadow-sm text-xs text-slate-800 dark:text-slate-200 font-bold">
-                            Halo! Ada tugas kuliah atau codingan yang mau kita bahas hari ini, beb?
+                            Halo! Ada tugas kuliah atau codingan yang mau kita bahas hari ini?
                         </div>
                     </div>
                 @endif
@@ -215,17 +211,18 @@
             }
         });
 
+        // Render gelembung chat baru di layar
         function appendMessage(role, text) {
             const welcome = document.getElementById('welcome-message');
             if(welcome) welcome.remove();
 
             const msgDiv = document.createElement('div');
             if (role === 'user') {
-                msgDiv.className = "flex justify-end";
-                msgDiv.innerHTML = `<div class="max-w-[75%] bg-purple-600 text-white px-4 py-2.5 rounded-2xl rounded-tr-sm shadow-sm text-xs font-medium whitespace-pre-wrap">${text}</div>`;
+                msgDiv.className = "flex justify-end animate-fade-in";
+                msgDiv.innerHTML = `<div class="w-fit max-w-[75%] bg-purple-600 text-white px-4 py-2.5 rounded-2xl rounded-tr-sm shadow-sm text-xs font-medium whitespace-pre-wrap">${text}</div>`;
             } else {
-                msgDiv.className = "flex items-start gap-2.5";
-                msgDiv.innerHTML = `<div class="h-7 w-7 bg-gradient-to-tr from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center text-white text-[10px] font-black shrink-0 shadow-sm">AI</div><div class="max-w-[80%] bg-white dark:bg-[#161245] border border-slate-200 dark:border-slate-800 px-4 py-2.5 rounded-2xl rounded-tl-sm shadow-sm text-xs text-slate-800 dark:text-slate-200 font-medium markdown-body">${marked.parse(text)}</div>`;
+                msgDiv.className = "flex items-start gap-2.5 animate-fade-in";
+                msgDiv.innerHTML = `<div class="h-7 w-7 bg-gradient-to-tr from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center text-white text-[10px] font-black shrink-0 shadow-sm">AI</div><div class="w-fit max-w-[80%] bg-white dark:bg-[#161245] border border-slate-200 dark:border-slate-800 px-4 py-2.5 rounded-2xl rounded-tl-sm shadow-sm text-xs text-slate-800 dark:text-slate-200 font-medium markdown-body">${marked.parse(text)}</div>`;
             }
             chatHistory.appendChild(msgDiv);
             chatHistory.scrollTop = chatHistory.scrollHeight;

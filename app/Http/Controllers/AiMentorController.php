@@ -121,6 +121,9 @@ class AiMentorController extends Controller
             // G. JURUS OTOMATIS BIKIN JUDUL CHAT (Cuma jalan di chat baru)
             $newTitle = $chat->title;
             if ($isNewChat) {
+                // FIX UTAMA: Kasih jeda napas 1 detik! Biar API Gemini gratisan lo nggak ngamuk ngira lo nge-spam
+                sleep(1);
+
                 $titlePrompt = "Rangkum pesan user berikut menjadi sebuah judul topik obrolan pendek yang padat berisi 3-5 kata saja. JANGAN gunakan tanda kutip, jangan pakai kata pengantar, langsung berikan hasil rangkumannya saja.\n\nPesan: " . $request->message;
                 
                 $titleResponse = Http::withoutVerifying()
@@ -132,11 +135,17 @@ class AiMentorController extends Controller
                     ]);
                 
                 $titleResult = $titleResponse->json();
+
+                // RADAR ERROR: Biar lo tau kalau API-nya gagal ngerespon
+                if (isset($titleResult['error'])) {
+                    \Illuminate\Support\Facades\Log::error('API Judul Gagal: ' . json_encode($titleResult['error']));
+                }
+                
                 $generatedTitle = $titleResult['candidates'][0]['content']['parts'][0]['text'] ?? null;
                 
                 if ($generatedTitle) {
-                    // Bersihin tanda baca yang mengganggu
-                    $newTitle = trim(str_replace(['"', "'", "\n"], '', $generatedTitle));
+                    // Bersihin tanda baca yang mengganggu dari AI
+                    $newTitle = trim(str_replace(['"', "'", "\n", "*", "#"], '', $generatedTitle));
                     $chat->update(['title' => $newTitle]);
                 }
             }
