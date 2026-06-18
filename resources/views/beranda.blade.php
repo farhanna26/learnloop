@@ -1,117 +1,217 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" x-data="{ darkMode: localStorage.getItem('theme') === 'dark', editProfileOpen: false, selectedPost: null }" :class="{ 'dark': darkMode }">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>LearnLoop | Platform Kolaborasi Mahasiswa</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
-        .glass-effect { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.05); }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    colors: { 
+                        brand: '#7c3aed',
+                        lightBg: '#f0f2fe',
+                        darkBg: '#090616'
+                    }
+                }
+            }
         }
-        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        /* --- TENGAH: HIGH-CONTRAST POP-UP STYLE (3D SOLID BLOK) --- */
+        .card-feed {
+            background: #ffffff;
+            border-radius: 2.25rem;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0px 14px 0px #cbd5e1;
+            transition: all 0.2s ease-in-out;
+        }
+        .card-feed:hover {
+            transform: translateY(4px);
+            box-shadow: 0px 8px 0px #cbd5e1;
+        }
+
+        .btn-pop-purple {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+            border: 2px solid #4c1d95;
+            box-shadow: 0px 6px 0px #4c1d95;
+            transition: all 0.15s ease;
+        }
+        .btn-pop-purple:active { transform: translateY(6px); box-shadow: 0px 0px 0px #4c1d95; }
+
+        .btn-pop-white {
+            background: #ffffff;
+            border: 2px solid #cbd5e1;
+            box-shadow: 0px 5px 0px #cbd5e1;
+            transition: all 0.15s ease;
+        }
+        .btn-pop-white:active { transform: translateY(5px); box-shadow: 0px 0px 0px #cbd5e1; }
+
+        .custom-input {
+            background: #ffffff;
+            border: 2px solid #cbd5e1;
+            border-radius: 1.5rem;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+        }
+
+        /* --- SINKRONISASI PER KONTEN SIDEBAR KANAN (3D UNGU & BORDER SAMAR) --- */
+        /* Hanya menargetkan elemen div pembungkus modul konten (bukan membungkus seluruh aside/logout) */
+        .lg\:col-span-3 aside > div:not(.pt-2) {
+            border: 1px solid rgba(124, 58, 237, 0.2) !important; /* Border samar ungu halus awal */
+            box-shadow: 0px 0px 0px transparent !important;
+            transform: translateY(0);
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        }
         
-        /* Custom Scrollbar untuk Modal Komentar */
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        /* Efek melayang 3D Ungu solid saat PER KOTAK KONTEN (Teman/Kreator) disorot kursor */
+        .lg\:col-span-3 aside > div:not(.pt-2):hover {
+            transform: translateY(-6px) !important;
+            border-color: #c084fc !important; /* Border ungu cerah saat hover */
+            box-shadow: 0px 10px 0px #7c3aed !important; /* Bayangan 3D Blok Ungu solid */
+        }
+
+        /* Flat item list di dalam kontainer modul sidebar */
+        .item-user-clean {
+            background: rgba(248, 250, 252, 0.6);
+            transition: background 0.2s ease;
+        }
+        .lg\:col-span-3 aside > div:hover .item-user-clean {
+            background: #ffffff;
+        }
+
+        /* Tombol Keluar Akun Mini 3D Merah Bawaan */
+        .btn-logout-mini {
+            background: #ffffff;
+            border: 2px solid #fecaca;
+            box-shadow: 0px 4px 0px #fca5a5;
+            transition: all 0.15s ease-in-out;
+        }
+        .btn-logout-mini:hover {
+            transform: translateY(2px);
+            box-shadow: 0px 2px 0px #fca5a5;
+            background: #fff5f5;
+        }
+        .btn-logout-mini:active { transform: translateY(4px); box-shadow: 0px 0px 0px #fca5a5; }
+
+        /* Dark Mode Styling */
+        .dark .card-feed { background: #161245; border: 2px solid #2e2773; box-shadow: 0px 14px 0px #0d0a2d; }
+        .dark .card-feed:hover { box-shadow: 0px 8px 0px #0d0a2d; }
+        .dark .btn-pop-white { background: #161245; border: 2px solid #2e2773; box-shadow: 0px 5px 0px #0d0a2d; color: white; }
+        .dark .custom-input { background: #0d0926; border: 2px solid #2e2773; color: #ffffff; }
+
+        /* Dark Mode Per Konten Modul Sidebar */
+        .dark .lg\:col-span-3 aside > div:not(.pt-2) { 
+            border: 1px solid rgba(139, 92, 246, 0.15) !important; 
+        }
+        .dark .lg\:col-span-3 aside > div:not(.pt-2):hover { 
+            border-color: #4c1d95 !important; 
+            box-shadow: 0px 10px 0px #4c1d95 !important; 
+        }
+        .dark .item-user-clean { background: rgba(13, 9, 38, 0.4); }
+        .dark .btn-logout-mini { background: #1a102f; border: 2px solid #e11d48; box-shadow: 0px 4px 0px #9f1239; color: #f43f5e; }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 999px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #2e2773; }
+        @keyframes cardPop { from { opacity: 0; transform: scale(0.95) translateY(15px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .animate-card { animation: cardPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
     </style>
 </head>
-<body class="min-h-screen text-slate-900">
+<body class="h-screen w-screen bg-[#f0f2fe] dark:bg-[#060412] text-[#1e1b4b] dark:text-[#f3f1fa] antialiased font-sans p-3 md:p-6 flex items-center justify-center overflow-hidden transition-colors duration-300">
 
-    <header class="sticky top-0 z-50 border-b border-slate-200 glass-effect">
-        <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-            <div class="flex flex-1 items-center gap-8">
-                <a href="#" class="flex items-center gap-2">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600 shadow-lg shadow-violet-200">
-                        <span class="text-xl font-bold text-white">L</span>
-                    </div>
-                    <span class="text-xl font-extrabold tracking-tight text-slate-900">LearnLoop</span>
-                </a>
-            </div>
-
-            <div class="flex items-center gap-3">
-                <input type="file" id="fileInput" class="hidden" accept="image/*,video/*,.pdf">
-                <button id="uploadBtn" class="items-center gap-2 rounded-2xl bg-violet-600 px-5 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:bg-violet-700 md:flex">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14m7-7H5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    Upload
-                </button>
-                
-                <a href="/profile" class="transition-transform hover:scale-110 active:scale-95">
-                    <img src="{{ Auth::user()->photo ? asset(Auth::user()->photo) : 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name ?? 'User').'&background=8b5cf6&color=ffffff&rounded=true' }}" class="h-9 w-9 rounded-xl object-cover shadow-sm border border-violet-100" title="Lihat Profil" />
-                </a>
-
-            </div>
-        </div>
-    </header>
-
-    <main class="mx-auto max-w-7xl px-4 py-8 pb-24 sm:px-6">
-        <div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
+    <div class="w-full max-w-[1440px] h-full bg-[#f8fafc] dark:bg-[#0b0822] rounded-[3.5rem] p-4 md:p-6 border-4 border-slate-200 dark:border-slate-800 shadow-xl grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-hidden">
+        
+        <div class="lg:col-span-2 h-full overflow-hidden">
             @include('components.sidebar')
+        </div>
 
-            <section id="feedContainer" class="lg:col-span-6 space-y-8">
+        <main id="mainScroll" class="lg:col-span-7 h-full flex flex-col space-y-6 overflow-y-auto custom-scrollbar pr-2 pb-4">
+            
+            <div class="flex items-center justify-between gap-4 pt-1 shrink-0">
+                <div class="relative w-full max-w-md">
+                    <span class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-purple-600 text-xs z-10">🔍</span>
+                    <input type="text" placeholder="Cari portfolio, riset, atau teman..." class="w-full custom-input pl-11 pr-4 py-3.5 text-xs font-black placeholder-slate-400 focus:outline-none">
+                </div>
+                <div class="flex items-center gap-3 shrink-0">
+                    <input type="file" id="fileInput" class="hidden" accept="image/*,video/*,.pdf">
+                    <button id="uploadBtn" class="btn-pop-purple text-white px-6 py-3.5 text-xs font-black rounded-2xl uppercase tracking-wider inline-block text-center cursor-pointer">
+                    ➕ Upload Karya
+                    </button>
                     
-                    @if(session('success'))
-                        <div class="animate-fade-in flex items-center gap-3 rounded-[24px] border border-emerald-100 bg-emerald-50 p-4 text-sm font-bold text-emerald-700 shadow-sm">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-200/50">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                            {{ session('success') }}
-                        </div>
+                    @if(auth()->user()->role === 'creator')
+                        <button onclick="document.getElementById('learningUploadModal').classList.remove('hidden')" class="btn-pop-white text-purple-700 px-6 py-3.5 text-xs font-black rounded-2xl uppercase tracking-wider inline-block text-center cursor-pointer">
+                        📘 Upload Materi
+                        </button>
                     @endif
-                    <div class="relative overflow-hidden rounded-[32px] bg-white border border-slate-200 p-8 shadow-sm">
-                        <h1 class="text-2xl font-extrabold text-slate-900">Halo, Mahasiswa Kreatif! 👋</h1>
-                        <p class="text-sm text-slate-500 mt-1">Bagikan materi atau hasil karyamu hari ini.</p>
-                    </div>
 
-                    <div class="my-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-in">
-                        <div class="flex items-center gap-2 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm w-fit">
-                            <button id="tab-portfolio" onclick="switchFeedType('portfolio')" class="px-5 py-2 rounded-xl text-sm font-bold bg-slate-900 text-white transition-all shadow-sm">
-                                Portofolio
-                            </button>
-                            <button id="tab-learning" onclick="switchFeedType('learning')" class="px-5 py-2 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-all">
-                                Pembelajaran
-                            </button>
-                        </div>
-
-                        @if(auth()->user()->role === 'creator')
-                            <button onclick="document.getElementById('learningUploadModal').classList.remove('hidden')" class="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md shadow-violet-200 active:scale-95">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                                </svg>
-                                Upload Materi Pembelajaran
-                            </button>
-                        @endif
-                    </div>
-
-                    <div id="postsWrapper" class="space-y-6"></div>
-
-                <div id="loadingIndicator" class="hidden text-center py-6">
-                    <div class="inline-block animate-spin">
-                        <svg class="h-6 w-6 text-violet-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                    </div>
+                    <button @click="darkMode = !darkMode; localStorage.setItem('theme', darkMode ? 'dark' : 'light')" class="btn-pop-white p-3.5 rounded-2xl text-xs">
+                        <span x-show="!darkMode">🌙</span><span x-show="darkMode">☀️</span>
+                    </button>
                 </div>
+            </div>
 
-                <div id="noMorePosts" class="hidden text-center py-8">
-                    <p class="text-slate-500 text-sm italic font-medium">✨ Sudah di penghujung materi ✨</p>
+            <div class="p-7 relative overflow-hidden flex flex-col md:flex-row items-center justify-between bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 text-white rounded-[2.5rem] border-2 border-purple-700 shadow-xl shrink-0">
+                <div class="space-y-2 max-w-full md:max-w-[70%] text-center md:text-left z-10">
+                    <h1 class="text-xl md:text-2xl font-black mt-1">Selamat datang di Beranda Academic! 👋</h1>
+                    <p class="text-xs text-purple-100 font-semibold leading-relaxed">Temukan riset, portofolio, dan ruang kelas kolaboratif mahasiswa hari ini.</p>
                 </div>
-            </section>
+                <div class="hidden md:flex items-center justify-center pr-4 z-10">
+                    <div class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-3xl transform rotate-12 border-2 border-white/30 shadow-lg">📚</div>
+                </div>
+            </div>
 
+            <div class="space-y-4 shrink-0">
+                <div class="flex gap-2 bg-slate-200/60 dark:bg-[#0d0926] p-1.5 rounded-2xl w-max border border-slate-300/40">
+                    <button id="tab-portfolio" onclick="switchFeedType('portfolio')" class="px-5 py-2.5 text-xs font-black bg-purple-600 text-white rounded-xl shadow-md uppercase tracking-wider transition-all">💼 Portofolio</button>
+                    <button id="tab-learning" onclick="switchFeedType('learning')" class="px-5 py-2.5 text-xs font-black text-slate-600 dark:text-purple-300/70 hover:text-purple-600 uppercase tracking-wider transition-all">📘 Pembelajaran</button>
+                </div>
+            </div>
+
+            <div id="postsWrapper" class="space-y-6"></div>
+
+            <div id="loadingIndicator" class="hidden text-center py-6">
+                <div class="inline-block animate-spin">
+                    <svg class="h-6 w-6 text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                        <path d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div id="noMorePosts" class="hidden text-center py-8">
+                <p class="text-slate-500 dark:text-slate-400 text-sm italic font-black uppercase tracking-widest">✨ Sudah di penghujung materi ✨</p>
+            </div>
+        </main>
+
+        <div class="lg:col-span-3 h-full overflow-hidden">
             @include('components.right-sidebar')
         </div>
-    </main>
+
+    </div>
+
+    <div x-show="selectedPost" x-transition class="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" style="display: none;">
+        <div class="w-full max-w-lg card-feed p-6 dark:bg-[#1d1545]" @click.away="selectedPost = null">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-purple-100/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center text-white font-black text-sm" x-text="selectedPost ? selectedPost.user.name[0] : ''"></div>
+                    <div>
+                        <h4 class="font-black text-xs text-purple-950 dark:text-white" x-text="selectedPost ? selectedPost.user.name : ''"></h4>
+                        <p class="text-[9px] text-slate-400 font-bold">Detail Post</p>
+                    </div>
+                </div>
+                <button @click="selectedPost = null" class="text-slate-400 bg-slate-100 dark:bg-purple-950/40 p-2 rounded-xl text-xs">✕</button>
+            </div>
+            <p class="text-xs md:text-sm font-semibold text-slate-700 dark:text-slate-200 leading-relaxed bg-purple-50/40 dark:bg-[#0d0926] p-4 rounded-2xl" x-text="selectedPost ? selectedPost.content : ''"></p>
+        </div>
+    </div>
 
     <div id="uploadModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
         <div class="w-full max-w-lg rounded-[32px] bg-white p-8 shadow-2xl">
@@ -217,29 +317,31 @@
         // Variabel global buat nentuin lagi di tab mana
         let currentFeedType = 'portfolio';
 
+        // --- Switch Feed Style Baru ---
         function switchFeedType(type) {
             currentFeedType = type;
             
             const btnPorto = document.getElementById('tab-portfolio');
             const btnLearn = document.getElementById('tab-learning');
 
-            // Reset styling
-            btnPorto.className = "px-5 py-2 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-all";
-            btnLearn.className = "px-5 py-2 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-all";
+            // Class UI Baru: Ungu untuk Aktif, Abu-abu untuk Non-Aktif
+            const activeClass = "px-5 py-2.5 text-xs font-black bg-purple-600 text-white rounded-xl shadow-md uppercase tracking-wider transition-all";
+            const inactiveClass = "px-5 py-2.5 text-xs font-black text-slate-600 dark:text-purple-300/70 hover:text-purple-600 uppercase tracking-wider transition-all";
 
             if(type === 'portfolio') {
-                btnPorto.className = "px-5 py-2 rounded-xl text-sm font-bold bg-slate-900 text-white transition-all shadow-sm";
+                btnPorto.className = activeClass;
+                btnLearn.className = inactiveClass;
             } else {
-                btnLearn.className = "px-5 py-2 rounded-xl text-sm font-bold bg-slate-900 text-white transition-all shadow-sm";
+                btnPorto.className = inactiveClass;
+                btnLearn.className = activeClass;
             }
 
-            // JURUS RESET FEED
-            postsWrapper.innerHTML = ''; // Kosongin postingan yang lagi nampil
-            currentOffset = 0; // Balikin hitungan ke nol
+            // Reset Feed
+            postsWrapper.innerHTML = ''; 
+            currentOffset = 0; 
             allPostsLoaded = false; 
-            noMorePosts.classList.add('hidden'); // Sembunyiin teks "Sudah di penghujung"
+            document.getElementById('noMorePosts').classList.add('hidden');
             
-            // Tarik data ulang dengan tipe yang baru!
             fetchPosts(0, 5);
         }
 
@@ -285,81 +387,45 @@
         function renderPost(post) {
             globalPostsData[post.id] = post;
             const article = document.createElement('article');
-            article.className = 'card-hover rounded-[32px] border border-slate-200 bg-white mb-6';
+            article.className = 'card-feed p-6 relative animate-card mb-6'; // Hapus cursor-pointer bawaan kawan lu
             article.id = `post-${post.id}`;
             
             const userName = post.user?.name || 'User';
             const filePath = post.image ? `/storage/${post.image}` : null; 
 
-            // Bikin Pill Badge buat Postingan
-            let roleBadge = '';
-            if (post.user?.role === 'creator') {
-                roleBadge = `<span class="bg-violet-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full ml-2 align-middle shadow-sm">Creator</span>`;
-            } else {
-                roleBadge = `<span class="bg-slate-200 text-slate-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full ml-2 align-middle shadow-sm">Learner</span>`;
-            }
+            let roleBadge = post.user?.role === 'creator' 
+                ? `<span class="bg-violet-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full ml-2 align-middle shadow-sm uppercase tracking-wider">Creator</span>` 
+                : `<span class="bg-slate-200 text-slate-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full ml-2 align-middle shadow-sm uppercase tracking-wider">Learner</span>`;
 
-            const userPhoto = post.user?.photo 
-                ? `/${post.user.photo}` 
-                : `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=7c3aed&color=ffffff&rounded=true`;
+            const userPhoto = post.user?.photo ? `/${post.user.photo}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=7c3aed&color=ffffff&rounded=true`;
             
             const isVideo = post.image?.match(/\.(mp4|webm|ogg|mov)$/i);
             const isPDF = post.image?.match(/\.(pdf)$/i);
             const isImage = post.image?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+            const likeColorClass = post.is_liked ? 'text-pink-500 bg-pink-50 border-pink-200' : 'text-slate-500 bg-slate-50 border-slate-200 hover:text-pink-500';
 
-            const likeColorClass = post.is_liked ? 'text-red-500' : 'text-slate-600 hover:text-red-500';
+            const safePostData = JSON.stringify(post).replace(/"/g, '&quot;');
 
-            // Logika Banner Gabung Kelas
             let roomBannerHtml = '';
             if (post.room_id && post.room) {
                 let isJoined = false;
-                if (post.user_id === currentUserId) {
-                    isJoined = true; 
-                } else if (post.room.users) {
-                    isJoined = post.room.users.some(u => u.id === currentUserId);
-                }
+                if (post.user_id === currentUserId) isJoined = true; 
+                else if (post.room.users) isJoined = post.room.users.some(u => u.id === currentUserId);
 
-                let buttonHtml = '';
-                if (isJoined) {
-                    buttonHtml = `
-                        <a href="/chat/${post.room_id}" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2.5 rounded-xl text-xs font-extrabold transition-all text-center block">
-                            Buka Kelas
-                        </a>
-                    `;
-                } else {
-                    buttonHtml = `
-                        <form action="/chat/join/${post.room_id}" method="POST" class="w-full sm:w-auto shrink-0">
-                            <input type="hidden" name="_token" value="${csrfToken}">
-                            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl text-xs font-extrabold shadow-lg shadow-emerald-200 transition-all active:scale-95">
-                                Gabung Kelas
-                            </button>
-                        </form>
-                    `;
-                }
+                let buttonHtml = isJoined 
+                    ? `<a href="/chat/${post.room_id}" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2.5 rounded-xl text-xs font-extrabold transition-all text-center block">Buka Kelas</a>` 
+                    : `<form action="/chat/join/${post.room_id}" method="POST" class="w-full sm:w-auto shrink-0"><input type="hidden" name="_token" value="${csrfToken}"><button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl text-xs font-extrabold shadow-lg shadow-emerald-200 transition-all active:scale-95">Gabung Kelas</button></form>`;
 
-                roomBannerHtml = `
-                    <div class="mx-5 mb-5 p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div class="flex items-center gap-3">
-                            <div class="h-10 w-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600 shrink-0 shadow-sm">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 14v6.5" /></svg>
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wider mb-0.5">Ruang Kelas Tersedia</p>
-                                <p class="text-sm font-bold text-slate-900 line-clamp-1">${post.room.name}</p>
-                            </div>
-                        </div>
-                        ${buttonHtml}
-                    </div>
-                `;
+                roomBannerHtml = `<div class="mx-5 mb-5 p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-20" onclick="event.stopPropagation();"><div class="flex items-center gap-3"><div class="h-10 w-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600 shrink-0 shadow-sm"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 14v6.5" /></svg></div><div><p class="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wider mb-0.5">Ruang Kelas Tersedia</p><p class="text-sm font-bold text-slate-900 line-clamp-1">${post.room.name}</p></div></div>${buttonHtml}</div>`;
             }
 
             article.innerHTML = `
                 <div class="flex items-start justify-between p-5">
                     <div class="flex items-center gap-3">
-                        <a href="/profile/${post.user?.id}" class="shrink-0 transition-transform hover:scale-105">
+                        <a href="/profile/${post.user?.id}" class="shrink-0 transition-transform hover:scale-105 relative z-20" onclick="event.stopPropagation();">
                             <img src="${userPhoto}" class="h-11 w-11 rounded-full ring-2 ring-violet-50 object-cover" />
                         </a>
-                        <div class="flex-1">
+                        <div class="flex-1 relative z-20" onclick="event.stopPropagation();">
                             <div class="flex items-center gap-2">
                                 <a href="/profile/${post.user?.id}" class="text-sm font-bold text-slate-900 hover:text-violet-600 hover:underline transition-colors">${userName}</a> ${roleBadge}
                                 ${post.type === 'learning' && post.category ? `<span class="bg-violet-100 text-violet-700 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ml-1">${post.category.name}</span>` : ''}
@@ -369,49 +435,33 @@
                     </div>
 
                     ${post.user_id === currentUserId ? `
-                    <div class="relative shrink-0 ml-4">
+                    <div class="relative shrink-0 ml-4 z-30" onclick="event.stopPropagation();">
                         <button onclick="togglePostMenu(${post.id})" class="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg>
                         </button>
-                        
                         <div id="post-menu-${post.id}" class="hidden absolute right-0 mt-1 w-36 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden py-1">
-                            <button onclick="editPost(${post.id})" class="w-full text-left px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-violet-600 transition-colors flex items-center gap-2">
-                                <span>✏️</span> Edit
-                            </button>
-                            <button onclick="deletePost(${post.id})" class="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2 border-t border-slate-50">
-                                <span>🗑️</span> Hapus
-                            </button>
+                            <button onclick="editPost(${post.id})" class="w-full text-left px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-violet-600 transition-colors flex items-center gap-2"><span>✏️</span> Edit</button>
+                            <button onclick="deletePost(${post.id})" class="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2 border-t border-slate-50"><span>🗑️</span> Hapus</button>
                         </div>
-                        <a href="/profile/${post.user?.id}" class="text-sm font-bold text-slate-900 hover:text-violet-600 hover:underline transition-colors">${userName}</a> ${roleBadge}
                     </div>
                     ` : ''} 
                 </div>
 
-                <div class="px-5 pb-4 text-sm text-slate-700 leading-relaxed">${post.content}</div>
+                <div class="px-5 pb-4 text-sm text-slate-700 leading-relaxed cursor-pointer relative z-10" x-on:click="selectedPost = ${safePostData}">${post.content}</div>
 
                 ${roomBannerHtml}
 
-                <div class="mx-5 mb-5 overflow-hidden rounded-2xl bg-slate-100 flex items-center justify-center">
+                <div class="mx-5 mb-5 overflow-hidden rounded-2xl bg-slate-100 flex items-center justify-center relative z-10" onclick="event.stopPropagation();">
                     ${isImage && filePath ? `<img src="${filePath}" class="w-full h-auto object-cover max-h-[500px]">` : ''}
                     ${isVideo && filePath ? `<video src="${filePath}" controls class="w-full h-auto max-h-[500px] bg-black"></video>` : ''}
-                    ${isPDF && filePath ? `
-                        <div class="w-full flex items-center justify-between p-6 bg-violet-50 border border-violet-100 rounded-2xl">
-                            <div class="flex items-center gap-4">
-                                <div class="h-12 w-12 flex items-center justify-center bg-white rounded-xl shadow-sm text-red-500 font-bold text-[10px]">PDF</div>
-                                <p class="text-sm font-bold text-slate-900 truncate max-w-[150px]">Dokumen Materi</p>
-                            </div>
-                            <a href="${filePath}" target="_blank" class="rounded-xl bg-violet-600 px-4 py-2 text-xs font-bold text-white hover:bg-violet-700 shadow-lg shadow-violet-100">Buka File</a>
-                        </div>
-                    ` : ''}
+                    ${isPDF && filePath ? `<div class="w-full flex items-center justify-between p-6 bg-violet-50 border border-violet-100 rounded-2xl"><div class="flex items-center gap-4"><div class="h-12 w-12 flex items-center justify-center bg-white rounded-xl shadow-sm text-red-500 font-bold text-[10px]">PDF</div><p class="text-sm font-bold text-slate-900 truncate max-w-[150px]">Dokumen Materi</p></div><a href="${filePath}" target="_blank" class="rounded-xl bg-violet-600 px-4 py-2 text-xs font-bold text-white hover:bg-violet-700 shadow-lg shadow-violet-100">Buka File</a></div>` : ''}
                 </div>
 
-                <div class="border-t border-slate-50 px-6 py-4 flex gap-6 text-sm font-bold">
-                    <button onclick="handleLike(${post.id})" id="like-btn-${post.id}" class="flex items-center gap-1.5 transition-colors ${likeColorClass}">
-                        ❤️ <span id="like-count-${post.id}">${post.likes_count || 0}</span>
+                <div class="pt-3 border-t-2 border-dashed border-slate-100 dark:border-slate-800/60 flex gap-2 text-[11px] font-bold relative z-20" onclick="event.stopPropagation();">
+                    <button onclick="handleLike(${post.id})" id="like-btn-${post.id}" class="flex items-center gap-1.5 px-4 py-2 rounded-xl transition-transform active:scale-95 border ${likeColorClass}">
+                        👍 <span id="like-count-${post.id}">${post.likes_count || 0}</span>
                     </button>
-                    <button onclick="openCommentModal(${post.id})" class="flex items-center gap-1.5 text-slate-600 hover:text-violet-600 transition-colors">
+                    <button onclick="openCommentModal(${post.id})" class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-slate-500 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-all active:scale-95">
                         💬 <span id="comment-count-${post.id}">${post.comments_count || 0}</span>
                     </button>
                 </div>
@@ -419,34 +469,28 @@
             return article;
         }
 
-        // --- FUNGSI LIKE ---
+        // --- FUNGSI LIKE (VERSI UPDATE UI) ---
         async function handleLike(postId) {
             const btnElement = document.getElementById(`like-btn-${postId}`);
             const countElement = document.getElementById(`like-count-${postId}`);
             
             try {
                 const response = await fetch(`/posts/${postId}/like`, {
-                    method: 'POST',
-                    headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+                    method: 'POST', headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
                 });
                 const result = await response.json();
-                
                 let currentCount = parseInt(countElement.innerText);
 
                 if (result.status === 'liked') {
-                    btnElement.classList.remove('text-slate-600', 'hover:text-red-500');
-                    btnElement.classList.add('text-red-500');
+                    btnElement.className = 'flex items-center gap-1.5 px-4 py-2 rounded-xl transition-transform active:scale-95 border text-pink-500 bg-pink-50 border-pink-200';
                     countElement.innerText = currentCount + 1;
                     globalPostsData[postId].is_liked = true;
                 } else {
-                    btnElement.classList.remove('text-red-500');
-                    btnElement.classList.add('text-slate-600', 'hover:text-red-500');
+                    btnElement.className = 'flex items-center gap-1.5 px-4 py-2 rounded-xl transition-transform active:scale-95 border text-slate-500 bg-slate-50 border-slate-200 hover:text-pink-500';
                     countElement.innerText = currentCount - 1;
                     globalPostsData[postId].is_liked = false;
                 }
-            } catch (error) {
-                console.error("Gagal melakukan like:", error);
-            }
+            } catch (error) { console.error("Gagal melakukan like:", error); }
         }
 
         // --- FUNGSI KOMENTAR FLOATING MODAL ---
@@ -488,9 +532,9 @@
             // Bikin Pill Badge buat Komentar
             let roleBadgeComment = '';
             if (comment.user?.role === 'creator') {
-                roleBadgeComment = `<span class="bg-violet-600 text-white text-[8px] font-bold px-2 py-0.5 rounded-full ml-1.5 align-middle shadow-sm">Creator</span>`;
+                roleBadgeComment = `<span class="bg-violet-600 text-white text-[8px] font-bold px-2 py-0.5 rounded-full ml-1.5 align-middle shadow-sm uppercase tracking-wider">Creator</span>`;
             } else {
-                roleBadgeComment = `<span class="bg-slate-200 text-slate-600 text-[8px] font-bold px-2 py-0.5 rounded-full ml-1.5 align-middle shadow-sm">Learner</span>`;
+                roleBadgeComment = `<span class="bg-slate-200 text-slate-600 text-[8px] font-bold px-2 py-0.5 rounded-full ml-1.5 align-middle shadow-sm uppercase tracking-wider">Learner</span>`;
             }
 
             const commenterPhoto = comment.user?.photo 
@@ -613,9 +657,11 @@
         }
 
         // Infinite Scroll
-        window.addEventListener('scroll', () => {
+        const mainScrollArea = document.getElementById('mainScroll');
+        mainScrollArea.addEventListener('scroll', () => {
             if (allPostsLoaded || isLoading) return;
-            if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 500) {
+            // Deteksi mentok bawah khusus untuk kontainer <main>
+            if (mainScrollArea.scrollTop + mainScrollArea.clientHeight >= mainScrollArea.scrollHeight - 500) {
                 fetchPosts(currentOffset, 3);
             }
         });

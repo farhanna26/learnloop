@@ -10,8 +10,23 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-// KITA GABUNGIN: Fillable standar lu + data profil buatan Aya
-#[Fillable(['name', 'email', 'password', 'description', 'photo', 'location', 'linkedin', 'gmail', 'role'])]
+// PERBAIKAN: Menambahkan portfolio, banner, serta koordinat X & Y untuk posisi gambar
+#[Fillable([
+    'name', 
+    'email', 
+    'password', 
+    'description', 
+    'photo', 
+    'banner', 
+    'location', 
+    'linkedin', 
+    'portfolio', // Menggantikan atau melengkapi gmail agar sinkron dengan form
+    'role',
+    'banner_x',
+    'banner_y',
+    'photo_x',
+    'photo_y'
+])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -42,14 +57,15 @@ class User extends Authenticatable
     // Narik data siapa aja yang nge-follow KITA (Followers)
     public function followers()
     {
-        // UDAH GUE FIX: Tambahin 'follows' sebagai nama tabelnya
         return $this->belongsToMany(User::class, 'follows', 'followed_id', 'follower_id')
                     ->withTimestamps();
     }
 
     // Helper untuk cek status follow
-    public function isFollowing(User $user)
-    {
+    public function isFollowing($user = null) {
+        // Jika tidak ada user yang dikirim, otomatis return false
+        if (!$user) return false; 
+        
         return $this->followings()->where('followed_id', $user->id)->exists();
     }
 

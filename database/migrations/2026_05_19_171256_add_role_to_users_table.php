@@ -7,12 +7,15 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     public function up(): void
-    {
+{
+    if (!Schema::hasColumn('users', 'role')) {
         Schema::table('users', function (Blueprint $table) {
-            // Default semua pendaftar baru adalah learner
-            $table->enum('role', ['learner', 'creator'])->default('learner')->after('email');
+            $table->enum('role', ['learner', 'creator'])
+                  ->default('learner')
+                  ->after('email');
         });
     }
+}
 
     public function down(): void
     {

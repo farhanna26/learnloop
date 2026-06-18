@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 
 class ChatController extends Controller
 {
-    // 1. Nampilin Isi Chat (Diupgrade buat Classroom)
+    // 1. Nampilin Isi Chat (Diupgrade buat Classroom + Sensor Notif)
     public function index($roomId) 
     {
         // Tarik data ruangan beserta membernya
@@ -26,6 +26,12 @@ class ChatController extends Controller
         $messages = Message::with('user')
                         ->where('room_id', $roomId)
                         ->get(); 
+
+        // LOGIKA BARU: Lunturin titik merah pesannya!
+        // Kita tandai semua pesan di kamar ini (yang BUKAN dari kita) jadi is_read = true
+        Message::where('room_id', $roomId)
+            ->where('username', '!=', auth()->user()->name)
+            ->update(['is_read' => true]);
 
         $chatTitle = 'Ruang Obrolan';
         $otherUser = null;
